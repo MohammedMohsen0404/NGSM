@@ -256,7 +256,7 @@ doi = {10.1109/IMTC.2011.5944309}
   pages={3753--3768},
   year={2022},
   publisher={Springer},
-  doi={10.1007/s00202-022-01586-2}
+  doi={10.1007/s00202-022-01581-w}
 }
 
 @article{shang2021achieving,
@@ -268,7 +268,7 @@ doi = {10.1109/IMTC.2011.5944309}
   pages={6915--6926},
   year={2022},
   publisher={IEEE},
-  doi={10.1109/TII.2022.3146197}
+  doi={10.1109/TII.2021.3139361}
 }
 
 @book{dugan2012electrical,
@@ -715,14 +715,14 @@ doi = {10.3390/s25175280}
   organization = {NVIDIA},
   note      = {Presented at GTC 2017. Available online at: \url{https://on-demand.gputechconf.com/gtc/2017/presentation/s7310-8-bit-inference-with-tensorrt.pdf}}
 }
-@inproceedings{HybridLSTMTrans2025,
+@article{HybridLSTMTrans2025,
   author       = {Vasilis Pentsos and Spyros G. Tragoudas and Jason A. Wibbenmeyer and Nasser Khdeer},
-  title        = {A Hybrid {LSTM}–Transformer Model for Power Load Forecasting},
-  booktitle    = {2025 IEEE Transactions on Smart Grid (TSG) Preprint / IEEE Int. Conf. on Smart Grid and Energy Systems},
+  title        = {A Hybrid {LSTM}--Transformer Model for Power Load Forecasting},
+  journal      = {IEEE Transactions on Smart Grid},
+  volume       = {16},
+  pages        = {2624--2634},
   year         = {2025},
-  doi          = {10.1109/TSG.2025.3535407},
-  note         = {Accepted/published as part of IEEE Smart Grid research series},  
-  keywords     = {power load forecasting, hybrid deep learning, LSTM, Transformer}
+  doi          = {10.1109/TSG.2025.3535407}
 }
 @article{HybridLSTMXGB2025,
   author    = {Falah Dakheel and Mesut \c{C}evik},
@@ -870,4 +870,131 @@ doi = {10.3390/s25175280}
   pages={55--64},
   year={2015},
   note={Seq2Point architecture published 2018}
+}
+
+% ---- Harmonics and forecasting revision ------------------------------------------------------
+@techreport{iec61000_4_7,
+  author={{International Electrotechnical Commission}},
+  title={Electromagnetic compatibility ({EMC}) -- Part 4-7: Testing and measurement techniques -- General guide on harmonics and interharmonics measurements and instrumentation, for power supply systems and equipment connected thereto},
+  institution={IEC},
+  number={IEC 61000-4-7:2002+AMD1:2008},
+  year={2009}
+}
+
+@techreport{iec61000_4_30,
+  author={{International Electrotechnical Commission}},
+  title={Electromagnetic compatibility ({EMC}) -- Part 4-30: Testing and measurement techniques -- Power quality measurement methods},
+  institution={IEC},
+  number={IEC 61000-4-30:2015},
+  year={2015}
+}
+
+@techreport{jcgm100,
+  author={{Joint Committee for Guides in Metrology}},
+  title={Evaluation of measurement data -- Guide to the expression of uncertainty in measurement},
+  institution={JCGM},
+  number={JCGM 100:2008},
+  year={2008}
+}
+
+@techreport{jcgm101,
+  author={{Joint Committee for Guides in Metrology}},
+  title={Evaluation of measurement data -- Supplement 1 to the ``Guide to the expression of uncertainty in measurement'' -- Propagation of distributions using a {Monte Carlo} method},
+  institution={JCGM},
+  number={JCGM 101:2008},
+  year={2008}
+}
+
+@techreport{ieee1057,
+  author={{IEEE Standards Association}},
+  title={IEEE Standard for Digitizing Waveform Recorders},
+  institution={IEEE},
+  number={1057-2017},
+  year={2018},
+  note={IEEE Std 1057-2017 (Revision of IEEE Std 1057-2007)}
+}
+
+@misc{oem_ct_report,
+  title        = {{YHDC SCT-013-000} Current Transformer: Test Report, Issue 6},
+  author       = {{OpenEnergyMonitor}},
+  howpublished = {\url{https://docs.openenergymonitor.org/_downloads/79920cf9f5ee68a06810965bf002a92f/YhdcCTReportIss6.pdf}},
+  note         = {Accessed: 2026-10-03}
+}
+
+@article{Diebold1995,
+  title={Comparing predictive accuracy},
+  author={Diebold, Francis X and Mariano, Roberto S},
+  journal={Journal of Business \& Economic Statistics},
+  volume={13},
+  number={3},
+  pages={253--263},
+  year={1995}
+}
+
+@article{Newey1987,
+  title={A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix},
+  author={Newey, Whitney K and West, Kenneth D},
+  journal={Econometrica},
+  volume={55},
+  number={3},
+  pages={703--708},
+  year={1987}
+}
+
+@article{Lim2021tft,
+  title={Temporal Fusion Transformers for interpretable multi-horizon time series forecasting},
+  author={Lim, Bryan and Ar{\i}k, Sercan {\"O} and Loeff, Nicolas and Pfister, Tomas},
+  journal={International Journal of Forecasting},
+  volume={37},
+  number={4},
+  pages={1748--1764},
+  year={2021}
+}
+
+@article{Herzen2022darts,
+  title={Darts: User-friendly modern machine learning for time series},
+  author={Herzen, Julien and L{\"a}ssig, Francesco and Piazzetta, Samuele Giuliano and Neuer, Thomas and Tafti, L{\'e}o and Raille, Guillaume and Van Pottelbergh, Tomas and Pasieka, Marek and Skrodzki, Andrzej and Huguenin, Nicolas and others},
+  journal={Journal of Machine Learning Research},
+  volume={23},
+  number={124},
+  pages={1--6},
+  year={2022}
+}
+
+@inproceedings{Ke2017lightgbm,
+  title={{LightGBM}: A highly efficient gradient boosting decision tree},
+  author={Ke, Guolin and Meng, Qi and Finley, Thomas and Wang, Taifeng and Chen, Wei and Ma, Weidong and Ye, Qiwei and Liu, Tie-Yan},
+  booktitle={Advances in Neural Information Processing Systems},
+  volume={30},
+  pages={3146--3154},
+  year={2017}
+}
+
+@article{Pedregosa2011sklearn,
+  title={Scikit-learn: Machine learning in {Python}},
+  author={Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and others},
+  journal={Journal of Machine Learning Research},
+  volume={12},
+  pages={2825--2830},
+  year={2011}
+}
+
+@article{Baris2024wind,
+  title={A robust chaos-inspired artificial intelligence model for dealing with nonlinear dynamics in wind speed forecasting},
+  author={Bar{\i}{\c{s}}, Caner and Yanarate{\c{s}}, Ca{\u{g}}fer and Altan, Ayta{\c{c}}},
+  journal={PeerJ Computer Science},
+  volume={10},
+  pages={e2393},
+  year={2024},
+  doi={10.7717/peerj-cs.2393}
+}
+
+@article{Altan2021wind,
+  title={A new hybrid model for wind speed forecasting combining long short-term memory neural network, decomposition methods and grey wolf optimizer},
+  author={Altan, Ayta{\c{c}} and Karasu, Se{\c{c}}kin and Zio, Enrico},
+  journal={Applied Soft Computing},
+  volume={100},
+  pages={106996},
+  year={2021},
+  doi={10.1016/j.asoc.2020.106996}
 }

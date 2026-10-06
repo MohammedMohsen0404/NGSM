@@ -67,10 +67,10 @@ To address the latency and bandwidth limitations of cloud-centric models, resear
 \subsection{Data Analytics and AI in Smart Grids}
 
 \subsubsection{Harmonics and Power Quality Analysis}
-The detection of power quality disturbances has traditionally relied on specialized, high-cost analyzers. However, recent initiatives have sought to integrate these capabilities into standard smart meters. Moustafa et al. demonstrated a web-based monitoring system utilizing a Raspberry Pi to classify harmonic distortions and voltage anomalies \cite{Moustafa2025PQ}. While effective, such implementations often employ single-board computers with relatively high power consumption, creating a need for solutions that provide equivalent spectral analysis on power-optimized industrial platforms.
+The detection of power quality disturbances has traditionally relied on specialized, high-cost analyzers. However, recent initiatives have sought to integrate these capabilities into standard smart meters. Moustafa et al. demonstrated a web-based power quality and energy monitoring system built on a Raspberry Pi and a power quality front-end that detects disturbances such as sags, swells, interruptions and voltage imbalance \cite{Moustafa2025PQ}. While effective, such implementations often employ single-board computers with relatively high power consumption, creating a need for solutions that provide equivalent spectral analysis on power-optimized industrial platforms. Harmonic measurement methods and their accuracy classes are standardized in IEC 61000-4-7 \cite{iec61000_4_7}, which embedded implementations have to follow for their indices to be comparable with those of dedicated instruments.
 
 \subsubsection{Energy Demand Forecasting}
-Short-term load forecasting (STLF) is critical for grid stability. Deep learning models have largely replaced traditional statistical methods to capture non-linear temporal dependencies. Hybrid architectures, such as those combining Long Short-Term Memory (LSTM) networks with Transformers, have been proposed to leverage both local feature extraction and global attention mechanisms \cite{HybridLSTMTrans2025}. Similarly, ensemble methods integrating LSTM with XGBoost have been explored to enhance robustness against demand volatility \cite{HybridLSTMXGB2025}. Despite their accuracy, these complex models often incur significant computational overheads, necessitating a careful balance between predictive performance and resource utilization in edge deployment scenarios.
+Short-term load forecasting (STLF) is critical for grid stability. Deep learning models have largely replaced traditional statistical methods to capture non-linear temporal dependencies. Hybrid architectures, such as those combining Long Short-Term Memory (LSTM) networks with Transformers, have been proposed to leverage both local feature extraction and global attention mechanisms \cite{HybridLSTMTrans2025}. Similarly, ensemble methods integrating LSTM with XGBoost have been explored to enhance robustness against demand volatility \cite{HybridLSTMXGB2025}. Hybrid models that combine signal decomposition with optimizer-tuned LSTM networks have been shown to capture the non-linear dynamics of wind speed series \cite{Altan2021wind, Baris2024wind}, and attention-based architectures such as the Temporal Fusion Transformer address multi-horizon forecasting with known future inputs \cite{Lim2021tft}. Gradient-boosted decision trees, made efficient by histogram-based implementations \cite{Ke2017lightgbm}, offer an inexpensive alternative when lag and calendar features are supplied. Despite their accuracy, these complex models often incur significant computational overheads, necessitating a careful balance between predictive performance and resource utilization in edge deployment scenarios.
 
 \subsubsection{Non-Intrusive Load Monitoring (Deep Learning)}
 In the domain of Non-Intrusive Load Monitoring (NILM), deep neural networks have surpassed combinatorial optimization methods. Convolutional architectures like Sequence-to-Point (Seq2Point) have proven effective in mapping aggregate power windows to appliance activations \cite{Zhang2018}. More recently, Transformer-based models such as BERT4NILM \cite{Yue2020}, NILMFormer \cite{Sykiotis2024}, and ELECTRIcity \cite{Massidda2022} have been adapted to model long-term temporal dependencies in energy data. While achieving state-of-the-art accuracy, these models typically fail to meet the strict memory and latency constraints of embedded smart meters, often requiring GPU acceleration for efficient inference.
@@ -422,109 +422,229 @@ To quantify the severity of the waveform distortion, the Total Harmonic Distorti
 THD = \frac{\sqrt{\sum_{h=2}^{H} Y_h^2}}{Y_1}
 \end{equation}
 
-The NGSM architecture implements a distributed detection strategy that processes these waveforms directly at the meter node. By utilizing the high-frequency sampling capabilities of the metrology unit, the embedded firmware executes a Fast Fourier Transform (FFT) to extract the spectral composition of the voltage and current signals. This approach aligns with modern distributed edge computing paradigms, which prioritize local data processing to achieve efficient and adaptable grid management without incurring the latency associated with centralized cloud analysis \cite{shang2021achieving}.
+where $H = 40$, the harmonic range defined by IEC 61000-4-7 \cite{iec61000_4_7}.
 
-To ensure accurate spectral estimation and minimize spectral leakage caused by finite windowing of non-periodic signals, a Blackman-Harris window function is applied to the time-domain signal prior to the FFT computation. The fundamental frequency is identified by detecting the peak magnitude index in the frequency spectrum. The RMS amplitude of the fundamental component ($Y_1$) and each subsequent harmonic order ($Y_h$) are then extracted. The magnitude of each harmonic is resolved relative to the fundamental to provide a normalized measure of distortion distinct from absolute signal amplitude.
+The NGSM architecture implements a distributed detection strategy that processes these waveforms directly at the meter node. The voltage and current waveforms are sampled at the meter and their spectral composition is computed locally, in line with distributed edge computing paradigms that process data close to the source to avoid the latency of centralized cloud analysis \cite{shang2021achieving}. Spectral estimation follows the harmonic-subgroup method of IEC 61000-4-7 \cite{iec61000_4_7}. The fundamental period is tracked from the positive-going zero crossings of the band-pass-filtered voltage, and both signals are resampled synchronously so that each analysis window contains exactly ten fundamental cycles (200~ms at 50~Hz) with 1024 points per cycle. A rectangular-window Discrete Fourier Transform (DFT) then places every harmonic exactly on a 5~Hz frequency bin, and $Y_h$ is taken as the RMS value of the harmonic subgroup, i.e., the bin at $h f_1$ and its two neighbours, which also collects the energy of small frequency variations within the window. Window values are aggregated as RMS over consecutive windows, as in IEC 61000-4-30 \cite{iec61000_4_30}. Synchronous windowing avoids the spectral leakage of a fixed-length windowed Fast Fourier Transform (FFT) with peak picking, whose accuracy depends on how closely the record length matches an integer number of cycles of the actual grid frequency. The spectral computation does not have to run on the meter itself: because the harmonic indices are reported at the 10-min aggregation interval, the meter can upload a few seconds of voltage and current samples per interval to a job scheduled on cloud CPUs, which computes the indices and returns them to the meter. This keeps the single core of the meter free for metrology and NILM inference and lowers its energy consumption.
 
-The THD monitoring and alerting logic follows harmonic distortion guidance from the IEEE 519-2022 standard \cite{ieee519_2022}. In the proposed NGSM prototype, the required voltage and current measurements are acquired through the STPM33 metering front-end and then are used to compute harmonic indicators for power-quality supervision at the grid edge. Voltage THD ($THD_V$) is prioritized using threshold-based levels derived from IEEE 519-2022 \cite{ieee519_2022}: values below 5\% are treated as nominal, while values above 8\% raise a high-priority alert indicating potentially harmful distortion conditions. In the same manner, current THD ($THD_I$) is monitored to detect major load-induced distortions. Figure \ref{fig:thd_analysis} illustrates a representative case from the STPM33-based prototype, contrasting a heavily distorted current waveform ($THD_I \approx 35.50\%$) with a compliant voltage waveform ($THD_V \approx 2.16\%$), as shown in the side-by-side comparison.
-
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/thd_analysis.png}
-    \caption{Total Harmonic Distortion analysis performed by the NGSM. The left subplot displays the current waveform exhibiting significant non-linear distortion ($THD \approx 35.50\%$), while the right subplot shows the voltage waveform remaining sinusoidal and within IEEE 519 compliance limits ($THD \approx 2.16\%$).}
-    \label{fig:thd_analysis}
-\end{figure}
-
-To provide more granular insight into the sources of distortion, a harmonic spectrum visualization is generated (Figure \ref{fig:harmonic_spectrum}), resolving the magnitude of individual harmonic orders for both signals. This frequency-domain representation decomposes the measured waveforms into harmonic orders relative to the fundamental frequency. As shown in the spectrum analysis, the current spectrum (Left) reveals distinct odd-order harmonic content (specifically 3rd, 5th, and 7th orders) characteristic of non-linear loads, whereas the voltage spectrum (Right) shows negligible harmonic magnitudes, confirming grid stability. \textbf{Limitation:} The reported THD values have not been validated against a calibrated power-quality analyzer; results represent prototype-level measurements for demonstrating embedded FFT feasibility rather than certified metrological accuracy.
-
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/harmonic_spectrum.png}
-    \caption{Comparative Harmonic Spectrum visualization. The current spectrum (Left) highlights the magnitude of individual harmonic orders relative to the fundamental, revealing dominant 3rd and 5th harmonics. The voltage spectrum (Right) confirms a clean signal dominated by the fundamental frequency.}
-    \label{fig:harmonic_spectrum}
-\end{figure}
-
-\subsection{Energy Demand Forecasting}
-\label{subsec:forecasting}
-
-To support proactive grid management and load balancing, the NGSM analytics suite integrates a comparative forecasting framework for short-horizon energy demand prediction. Energy demand forecasting estimates future consumption from historical measurements and is an enabling capability for cost-aware and carbon-aware operation in modern smart grids~\cite{Alsamraee2025}. While accurate forecasting is often challenged by non-stationary usage patterns, household behavior variability, and latent exogenous factors~\cite{Hossain2025}, this work evaluates three representative modeling paradigms, a classical statistical baseline, a deep recurrent network, and an attention-based architecture to characterize their suitability for univariate residential load forecasting.
-
-\subsubsection{Dataset Description (UK-DALE)}
-All experiments are conducted using the UK Domestic Appliance-Level Electricity dataset (UK-DALE)~\cite{Kelly2015ukdale}. UK-DALE provides long-duration residential electricity measurements (including whole-home demand and appliance-level sub-metering) collected from multiple UK homes. In this study the focus is on a univariate forecasting setting and use the aggregated active power signal (``Active Power'') as the prediction target, consistent with the NGSM objective of modeling demand at the meter/aggregate level rather than per-appliance disaggregation.
-
-\subsubsection{Preprocessing and Data Protocol}
-The raw signal is indexed by timestamps. Timestamps are converted into timezone-free datetime objects and use them as the temporal index to ensure consistent time ordering and deterministic slicing of the series. To ensure a fixed and uniform temporal resolution, the series is resampled to a regular 1-second frequency (1s) using mean aggregation and linear interpolation for missing values, and boundary NaNs are removed.
-
-Let $N$ denote the total number of samples after resampling. To form a deterministic forecasting benchmark, the training set is constructed from the first quarter of the available series, i.e., indices $[0, \lfloor N/4 \rfloor)$. The test set is constructed from the immediately following fixed window of length $T=2{,}500{,}000$ samples, i.e., indices $[\lfloor N/4 \rfloor, \lfloor N/4 \rfloor + T)$. Since the resampled resolution is 1 second, this evaluation horizon corresponds to a long contiguous duration on the order of weeks, enabling assessment under prolonged distribution shifts and rare operating regimes.
-
-To prevent information leakage, a Min--Max scaler is fitted only on the training portion and apply the learned scaling parameters to both training and test segments. For all models, predictions are inverse-transformed to the original active power scale prior to reporting error metrics.
-
-\subsubsection{Forecasting Models}
-
-As a classical baseline capturing linear temporal dependencies, an Auto-Regressive Integrated Moving Average (ARIMA) model was implemented (ARIMA) model with order $(p,d,q)=(1,1,0)$. The ARIMA model is fitted on the scaled training sequence. During inference, the model produces a contiguous forecast spanning the full test horizon, enabling direct comparison with neural forecasting models on identical test indices.
-
-To model nonlinear temporal structure, a stacked Long Short-Term Memory (LSTM) network was trained in a sequence-to-one configuration. The model consumes a look-back window of length $L=1024$ and predicts the next value. The architecture follows a stacked design with three LSTM blocks of hidden sizes $(64,32,16)$, with Batch Normalization and Dropout ($p=0.2$) to improve generalization, followed by a dense output projection. Optimization is performed using Nadam with MSE loss. The model is trained for 20 epochs with batch size 64 and uses validation split of 0.2.
-
-To assess an attention-based alternative for long-range dependency modeling, a Temporal Fusion Transformer (TFT) was implemented using the Darts library and trained it on an NVIDIA A100 GPU. The training pipeline uses PyTorch Lightning with automatic mixed precision (bf16-mixed) and early stopping based on validation loss. A validation series is created by splitting the training sequence at 90\% (trainseries.split before(0.9)), enabling deterministic monitoring of generalization during training. The TFT configuration includes: hidden size 64, one LSTM layer (lstm layers=1), four attention heads (num attention heads=4), dropout 0.3, and batch size 2048, with a maximum of 15 epochs and early stopping patience of 3. The model is checkpointed and exported for reproducible reloading and evaluation.
-
-\subsubsection{Evaluation Protocol}
-A key requirement in this benchmark is that all models are evaluated under the same forecasting task definition. MAE, RMSE, and MAPE was computed on the same contiguous test horizon of length $T=2{,}500{,}000$ samples after inverse scaling.
-
-For TFT, evaluation is performed via rolling one-step-ahead forecasting using Darts historical forecasts. The model generates next-step predictions with (forecast horizon=1) and (stride=1), without retraining (retrain=False). The parameter (last points only=True) is used to return one prediction per step and reduce memory overhead. Predicted timestamps are intersected with the ground-truth timestamps to ensure strict temporal alignment prior to metric computation.
-
-\subsubsection{Reproducibility Configuration}
-Table~\ref{tab:forecast_repro} documents the full configuration required to reproduce the reported results, including the data split definition, scaling strategy, training hyperparameters, and evaluation procedure for each model.
-
-\begin{table*}[!t]
-\centering
-\caption{Reproducibility details for the forecasting benchmark on UK-DALE~\cite{Kelly2015ukdale}.}
-\label{tab:forecast_repro}
-\small
-\begin{tabular}{l p{4.5cm} p{5.0cm} p{4.5cm}}
-\toprule
-Model &
-Data protocol &
-Training configuration &
-Inference / evaluation configuration \\
-\midrule
-
-ARIMA &
-Resampled to 1-second frequency. Train: first $N/4$ samples; Test: next $T=2{,}500{,}000$ samples. Min--Max fit on train only; applied to test. &
-ARIMA order $(1,1,0)$ fitted on scaled train sequence. &
-Contiguous horizon prediction matching the full test length; inverse scaling prior to MAE/RMSE/MAPE. \\
-
-LSTM &
-Resampled to 1-second frequency. Same split/scaling as ARIMA. Input window length $L=1024$ for sequence-to-one training. &
-Stacked LSTM hidden sizes $(64,32,16)$ with BatchNorm and Dropout($0.2$); Dense(1) output; optimizer Nadam; loss MSE; batch size 64; epochs 20; validation split=0.2. &
-One-step-ahead prediction over the test region using the learned scaler; inverse-transform outputs prior to MAE/RMSE/MAPE. \\
-
-TFT &
-Resampled to 1-second frequency. TimeSeries created in Darts; Min--Max fitted on training only; validation split from tail of training: 90\%/10\%; evaluation performed on the test horizon $T=2{,}500{,}000$. &
-Darts TFTModel: hidden size 64, lstm layers=1, num attention heads=4, dropout 0.3, batch size 2048, max epochs 15; PyTorch Lightning: GPU (NVIDIA A100), precision bf16-mixed; early stopping on val loss with patience 3; checkpoint saving enabled. &
-Rolling one-step-ahead forecasting using historical forecasts with forecast horizon=1, stride=1, retrain=False, last points only=True; strict timestamp alignment; inverse scaling prior to metrics. \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\subsubsection{Forecasting Performance and Discussion}
-The comparative evaluation on the held-out test horizon is summarized in Table~\ref{tab:model_comparison}. The results show that the LSTM achieves the lowest error among the evaluated models in this univariate setting, outperforming both the ARIMA baseline and the TFT configuration trained without additional covariates.
+The estimator was verified on synthetic voltage and current signals with known harmonic content, generated at the 44~kHz rate of the prototype capture described below (3-s records). Seven harmonic profiles were used, from a low-distortion profile (6.2\% THD) to an SMPS-like profile (110\% THD), including profiles matching the measured current and voltage spectra. The signals had random harmonic phases, fundamental frequencies from 49 to 51~Hz, a frequency drift of 0.5~Hz within the record, a 1\% interharmonic at 175~Hz, and band-limited noise at the level measured on the prototype. Table~\ref{tab:thd_verification} and Figure~\ref{fig:thd_verification} compare the subgroup estimator with a fixed-length Blackman--Harris FFT with peak picking and with a notch method that removes only the fundamental. The subgroup estimator stays within 0.31 percentage points (pp) of the true THD for the profile matching the measured current, and within 1.09~pp in the worst case, the low-distortion profile at the measured noise floor. Peak picking is exact only when the record contains an integer number of cycles (50.0~Hz) and deviates by up to 5.4~pp at 50.2~Hz and 10.9~pp under frequency drift. The notch method retains the noise and therefore estimates THD plus noise (THD+N) rather than THD.
 
 \begin{table}[!t]
 \centering
-\caption{Forecasting accuracy on UK-DALE test horizon ($T=2{,}500{,}000$ samples at 1-second resolution).}
-\label{tab:model_comparison}
-\begin{tabular}{lccc}
+\caption{Verification of the THD estimators on synthetic signals.}
+\label{tab:thd_verification}
+\begin{tabular}{lcc}
 \toprule
-Metric & LSTM & ARIMA & TFT \\
+Estimator & Max. $|\Delta THD|$ (pp) & Mean $|\Delta THD|$ (pp) \\
 \midrule
-MAE (W)  & \textbf{12.70} & 38.50 & 33.58 \\
-RMSE (W) & \textbf{25.80 }& 52.60 & 48.30 \\
-MAPE (\%) & \textbf{3.00 } & 12.00 & 8.35 \\
+Harmonic subgroups, IEC 61000-4-7 & \textbf{1.09} & \textbf{0.26} \\
+Blackman--Harris FFT, peak picking & 10.92 & 1.06 \\
+Notch filter (THD+N) & 3.20 & 0.83 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-In interpreting these results, it is important to consider inductive bias and supervision structure. The TFT architecture is designed to exploit rich temporal context and (typically) multiple covariates through attention and gating mechanisms, whereas the LSTM provides a strong bias toward local sequential dynamics. In a strictly univariate series, the LSTM can be more data-efficient and may generalize more robustly than a higher-capacity attention-based model unless additional covariates (e.g., weather, tariffs, occupancy proxies, calendar features) are provided. Consequently, the LSTM is selected as the primary forecasting engine. To prevent additional computational burden on the edge hardware, this forecasting model is deployed on a cloud server. This architectural decision ensures that the embedded resources remain dedicated to real-time metrology and privacy-preserving NILM, while the cloud infrastructure handles the predictive analytics without impacting the meter performance.
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/thd_method_verification.png}
+    \caption{Worst-case THD error of the estimators versus fundamental frequency.}
+    \label{fig:thd_verification}
+\end{figure}
+
+The method was applied to a 5-s capture of voltage and current recorded with the prototype acquisition chain (220{,}000 samples at approximately 44~kHz) while supplying a 47~W non-linear load with a power factor of 0.84. The fundamental frequency, estimated from the cycle timing, was $50.13 \pm 0.01$~Hz. Figure~\ref{fig:thd_analysis} shows the waveforms over four cycles and the harmonic spectra of orders 2 to 15, in percent of the fundamental, with the expanded uncertainty ($k = 2$) of each harmonic. The current is dominated by the 3rd (31.5\%), 5th (10.1\%) and 9th (5.1\%) harmonics, characteristic of a capacitor-input rectifier, whereas the largest voltage harmonic is the 3rd at 1.3\%. In addition to the synthetic verification, the prototype measurement was cross-checked in three ways that do not depend on the FFT implementation (Table~\ref{tab:thd_consistency}). First, an independent estimator that fits sine and cosine terms at $h f_1$ ($h = 1, \dots, 40$) directly to the raw samples of each window by least squares, in the manner of IEEE Std 1057 \cite{ieee1057}, agrees with the subgroup result within 0.003~pp for $THD_V$ and 0.37~pp for $THD_I$. Second, the active power computed in the time domain (46.71~W) equals the sum of the per-harmonic active powers $\sum_h V_h I_h \cos\varphi_h$ within 0.02\%, which checks the amplitudes and the relative phases of both channels. Third, the in-band current noise (13.0~mA) is 25 times larger than the quantization noise of the converter (0.53~mA), so it originates in the analog front end rather than in the digitization. At this light load the noise amounts to 5.8\% of the fundamental current and, together with the fluctuating operation of the load, causes the window-to-window variation of $THD_I$ (standard deviation 1.6~pp over 200-ms windows).
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/thd_analysis_iec.png}
+    \caption{Waveforms and harmonic spectra of the prototype capture.}
+    \label{fig:thd_analysis}
+\end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{Consistency checks of the prototype measurement.}
+\label{tab:thd_consistency}
+\begin{tabular}{lc}
+\toprule
+Check & Value \\
+\midrule
+$THD_V$: subgroup DFT vs.\ least-squares fit & 0.003~pp \\
+$THD_I$: subgroup DFT vs.\ least-squares fit & 0.37~pp \\
+Largest difference in $I_h$ ($h \le 15$) & 1.01~pp of $I_1$ \\
+Active power, time domain & 46.71~W \\
+Active power, sum over harmonics & 46.70~W \\
+Power closure error & $-0.02$\% \\
+Harmonic active power $P - P_1$ & $-0.005$~W \\
+In-band current noise & 13.0~mA \\
+Quantization noise (step$/\sqrt{12}$) & 0.53~mA \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The uncertainty of the reported THD values was evaluated following the Guide to the Expression of Uncertainty in Measurement (GUM) \cite{jcgm100} with Monte Carlo propagation \cite{jcgm101} (Table~\ref{tab:thd_uncertainty}). The budget combines the window-to-window repeatability (Type A); the frequency response of the current transformer, bounded by 1\% up to 1.5~kHz and 3\% at 2.5~kHz according to an independent test of split-core metering current transformers \cite{oem_ct_report}; the frequency response of the voltage sensor, whose behaviour above 60~Hz is not specified in its datasheet and for which a bound of $\pm$2\% up to 2~kHz is assumed; the measured noise floor; and the estimator error obtained from the synthetic verification for the measured spectra. The result is $THD_V = 2.15 \pm 0.03\%$ and $THD_I = 35.02 \pm 0.84\%$ (expanded uncertainty, $k = 2$). Repeatability dominates the current uncertainty, which reflects the load and the light-load noise rather than the estimator.
+
+\begin{table}[!t]
+\centering
+\caption{Uncertainty budget of the THD measurement.}
+\label{tab:thd_uncertainty}
+\begin{tabular}{lcc}
+\toprule
+Source & $u(THD_V)$ (pp) & $u(THD_I)$ (pp) \\
+\midrule
+Repeatability (Type A) & 0.002 & 0.341 \\
+Voltage sensor response & 0.012 & -- \\
+Current transformer response & -- & 0.166 \\
+Noise floor & 0.002 & 0.074 \\
+Estimator (synthetic verification) & 0.005 & 0.183 \\
+Combined & 0.013 & 0.419 \\
+\midrule
+Result ($k = 2$) & $2.15 \pm 0.03\%$ & $35.02 \pm 0.84\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The THD monitoring and alerting logic follows the harmonic limits of IEEE 519-2022 \cite{ieee519_2022}: for bus voltages below 1~kV, voltage THD values below 5\% are treated as nominal, while values above 8\% raise a high-priority alert. The measured voltage distortion (THD 2.15\%, largest individual harmonic 1.3\%) lies well below the 8\% THD and 5\% individual-harmonic limits. This is a screening result: an IEEE 519 compliance assessment uses weekly statistics of 10-min and 3-s values at the point of common coupling, and the current limits apply to the total demand distortion relative to the maximum demand current of the installation rather than to the current THD of a single appliance. The current THD is therefore reported as an appliance-level indicator of load-induced distortion.
+
+\subsection{Energy Demand Forecasting}
+\label{subsec:forecasting}
+
+NGSM complements the on-meter analytics with a cloud forecasting service for the aggregate household demand. Energy demand forecasting is an enabling capability for cost-aware and carbon-aware operation of smart grids \cite{Alsamraee2025}, and statistical models such as ARIMA are routinely compared with deep recurrent networks for energy forecasting tasks \cite{Hossain2025}; household demand is particularly difficult to predict because of non-stationary usage patterns and behavioural variability. The service consumes the same 15-min interval values that the meter already reports for billing and NILM, so it requires no additional data from the meter. It provides short-horizon forecasts of up to 1~h, e.g. for demand response, and day-ahead forecasts for planning. This section describes the benchmark used to select the forecasting models, their computational cost, and the behaviour of the service when the connection to the cloud is lost.
+
+All experiments use the aggregate active power of House~1 of the UK Domestic Appliance-Level Electricity dataset (UK-DALE) \cite{Kelly2015ukdale}, recorded every 6~s from November 2012 to April 2017. The forecasting target is the mean active power of each 15-min interval, the reporting interval of the meter. An interval is scored only if at least 80\% of its 6-s samples are present; missing intervals are never interpolated, and the model inputs carry forward the last available value so that no future information enters a forecast. Forecasting at a resolution finer than the native 6~s is not meaningful: after resampling to 1~s, 85\% of the points are interpolated and a one-second persistence forecast already reaches 4.3~W MAE. The data are split chronologically into whole years (Table~\ref{tab:forecast_protocol}): training from April 2013 to March 2015, validation from April 2015 to March 2016, and testing from April 2016 to March 2017. The months before April 2013 are excluded because 29--39\% of their intervals are missing. Every interval of a split serves as a forecast origin as long as its 24-h horizon stays inside the split. From each origin, every model forecasts the next 1 to 96 intervals, and all models are scored on identical origins and targets (34{,}944 origins in the test year).
+
+\begin{table}[!t]
+\centering
+\caption{Data splits of the forecasting benchmark.}
+\label{tab:forecast_protocol}
+\begin{tabular}{lccccc}
+\toprule
+Split & Period & Intervals & Scored (\%) & Mean (W) & Std (W) \\
+\midrule
+Train & Apr 2013 -- Mar 2015 & 70{,}080 & 99.3 & 363 & 318 \\
+Validation & Apr 2015 -- Mar 2016 & 35{,}136 & 98.0 & 388 & 351 \\
+Test & Apr 2016 -- Mar 2017 & 35{,}040 & 98.9 & 396 & 351 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four reference forecasts that require little or no training serve as baselines: persistence (the last observed value), seasonal naive forecasts that repeat the value of the same interval one day or one week earlier, and the Auto-Regressive Integrated Moving Average model ARIMA(1,1,0) of the original NGSM design, fitted on the training years. Three learned models are compared with them. The first consists of gradient-boosted regression trees (GBM) with histogram-based boosting \cite{Ke2017lightgbm, Pedregosa2011sklearn}, with one model per reported horizon; its features are the most recent values and the 1-h and 24-h means, the values of the target interval one, two and seven days earlier, and calendar features of the target interval (time of day, day of week, weekend flag and month). The second is the stacked Long Short-Term Memory (LSTM) network of the NGSM design, with hidden sizes 64, 32 and 16, batch normalization and dropout 0.2, which takes the last two days (192 intervals) of power and calendar features as input and predicts all 96 horizons at once; its output layer additionally receives the values of the same 96 intervals one day and one week earlier. The third is a Temporal Fusion Transformer (TFT) \cite{Lim2021tft}, implemented with Darts \cite{Herzen2022darts}, with hidden size 64, one LSTM layer, four attention heads and dropout 0.3, which uses the same two-day input and 96-step output as the LSTM and receives the calendar features as known future inputs. The LSTM and TFT are trained with the mean squared error on min--max scaled data, excluding unscored intervals from the loss, with early stopping on the validation year and restoration of the best epoch. Each learned model is trained with five random seeds. Table~\ref{tab:forecast_repro} lists the complete configuration.
+
+\begin{table*}[!t]
+\centering
+\caption{Configuration of the forecasting models.}
+\label{tab:forecast_repro}
+\small
+\begin{tabular}{l p{13.2cm}}
+\toprule
+Model & Configuration \\
+\midrule
+All & 15-min mean active power; train / validation / test: Apr 2013--Mar 2015 / Apr 2015--Mar 2016 / Apr 2016--Mar 2017; min--max scaling fitted on the training years; unscored intervals excluded from losses and metrics; forecasts of 1--96 intervals from every origin. \\
+Baselines & Persistence; seasonal naive with periods of 1 and 7 days; ARIMA(1,1,0) fitted on the training years ($\phi = -0.26$) with closed-form $h$-step forecasts. \\
+GBM & Histogram gradient boosting (scikit-learn), one model for each of the horizons 1, 4, 16 and 96 intervals; learning rate 0.05, 63 leaves, L2 regularization 1.0, at most 600 iterations with early stopping (10\% internal validation, 30 rounds); 5 seeds. \\
+LSTM & LSTM layers 64--32--16 with batch normalization and dropout 0.2; dense output of 96 values that also receives the same intervals 1 and 7 days earlier; input of 192 intervals $\times$ 5 features (scaled power; time of day and day of week as sine/cosine); NAdam, learning rate $10^{-3}$ halved on validation plateau (patience 2), batch 256, at most 60 epochs, early stopping patience 6, gradient clipping 1.0; 5 seeds. \\
+TFT & Darts TFTModel: hidden size 64, 1 LSTM layer, 4 attention heads, dropout 0.3; input 192, output 96 intervals; known future covariates: time of day, day of week and month (sine/cosine); mean squared error loss; Adam, learning rate $10^{-3}$, batch 256, at most 40 epochs, early stopping patience 5, best epoch restored; 5 seeds. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Accuracy is reported at horizons of 15~min, 1~h, 4~h and 24~h as MAE, RMSE and normalized MAE (nMAE, the MAE divided by the mean test-year load of 396~W). For the learned models, the tables give the mean and standard deviation over the five seeds. Skill is the MAE reduction relative to the strongest baseline at each horizon. Differences in accuracy are tested with the Diebold--Mariano test \cite{Diebold1995} on absolute errors, applied to the seed-averaged forecasts, with a Newey--West variance estimate \cite{Newey1987} whose lag covers at least one day to account for the autocorrelation of the forecast errors.
+
+Table~\ref{tab:model_comparison} summarizes the results on the test year, and Figure~\ref{fig:forecast_horizon} shows the MAE of the seed-averaged LSTM and TFT forecasts at every horizon from 15~min to 24~h together with the GBM at its four horizons. From 1~h ahead onward, all three learned models outperform the strongest baseline by 16--26\% (Diebold--Mariano $p < 0.001$). At 15~min the last observed value is already a strong predictor: only the GBM improves on persistence and ARIMA(1,1,0), by 7\%. The LSTM is on par with them (its mean MAE over seeds is 0.6\% higher, while its seed-averaged forecast is slightly more accurate, $p = 0.03$), and the TFT is 15\% less accurate and varies strongly between seeds. Among the learned models, the GBM is the most accurate up to 1~h and the most stable across seeds; at 1~h the errors of the LSTM and TFT are 2.8\% and 5.5\% higher ($p < 0.001$). At 4~h the TFT and GBM are equivalent (0.4\% difference, $p = 0.11$), and for day-ahead forecasts the TFT is the most accurate, with 2.1\% and 3.9\% lower errors than the GBM and LSTM ($p \le 0.001$). NGSM therefore uses the GBM for forecasts up to 1~h and the TFT for day-ahead forecasts. The nMAE of 31--41\% of these models reflects the limited predictability of a single household at 15-min resolution, where the switching of individual appliances dominates the load.
+
+\begin{table}[!t]
+\centering
+\caption{Forecast accuracy on the test year.}
+\label{tab:model_comparison}
+\small
+\begin{tabular}{llcccc}
+\toprule
+Horizon & Model & MAE (W) & RMSE (W) & nMAE (\%) & Skill (\%) \\
+\midrule
+15 min & Persistence & 130.6 & 331.0 & 32.9 & $-0.3$ \\
+ & Seasonal naive (day) & 218.8 & 452.9 & 55.2 & $-68.0$ \\
+ & Seasonal naive (week) & 231.8 & 457.9 & 58.5 & $-78.0$ \\
+ & ARIMA(1,1,0) & 130.2 & 314.4 & 32.9 & 0.0 \\
+ & GBM & \textbf{121.1} $\pm$ 0.4 & 277.2 $\pm$ 0.8 & 30.5 & 7.0 \\
+ & LSTM & 131.0 $\pm$ 3.4 & 288.0 $\pm$ 0.9 & 33.1 & $-0.6$ \\
+ & TFT & 150.4 $\pm$ 14.4 & 307.0 $\pm$ 23.4 & 37.9 & $-15.5$ \\
+\midrule
+1 h & Persistence & 195.0 & 420.2 & 49.2 & $-1.4$ \\
+ & Seasonal naive (day) & 218.8 & 452.9 & 55.2 & $-13.7$ \\
+ & Seasonal naive (week) & 231.8 & 457.9 & 58.5 & $-20.5$ \\
+ & ARIMA(1,1,0) & 192.4 & 404.3 & 48.5 & 0.0 \\
+ & GBM & \textbf{153.8} $\pm$ 0.8 & 317.3 $\pm$ 0.6 & 38.8 & 20.1 \\
+ & LSTM & 158.1 $\pm$ 3.9 & 321.8 $\pm$ 1.0 & 39.9 & 17.8 \\
+ & TFT & 162.2 $\pm$ 3.5 & 325.0 $\pm$ 7.6 & 40.9 & 15.7 \\
+\midrule
+4 h & Persistence & 252.7 & 477.1 & 63.8 & $-15.5$ \\
+ & Seasonal naive (day) & 218.8 & 452.9 & 55.2 & 0.0 \\
+ & Seasonal naive (week) & 231.9 & 457.9 & 58.5 & $-6.0$ \\
+ & ARIMA(1,1,0) & 249.3 & 458.6 & 62.9 & $-13.9$ \\
+ & GBM & 161.8 $\pm$ 1.3 & 329.5 $\pm$ 0.9 & 40.8 & 26.0 \\
+ & LSTM & 165.6 $\pm$ 3.5 & 327.4 $\pm$ 0.8 & 41.8 & 24.3 \\
+ & TFT & \textbf{161.2} $\pm$ 3.5 & 328.6 $\pm$ 4.2 & 40.7 & 26.3 \\
+\midrule
+24 h & Persistence & 218.4 & 452.4 & 55.1 & $-2.2$ \\
+ & Seasonal naive (day) & 218.4 & 452.4 & 55.1 & $-2.2$ \\
+ & Seasonal naive (week) & 231.7 & 457.7 & 58.5 & $-8.4$ \\
+ & ARIMA(1,1,0) & 213.7 & 432.7 & 53.9 & 0.0 \\
+ & GBM & 167.5 $\pm$ 0.9 & 334.9 $\pm$ 0.7 & 42.3 & 21.6 \\
+ & LSTM & 170.5 $\pm$ 8.3 & 330.7 $\pm$ 1.1 & 43.0 & 20.2 \\
+ & TFT & \textbf{164.1} $\pm$ 3.0 & 330.5 $\pm$ 2.3 & 41.4 & 23.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/forecast_mae_vs_horizon.png}
+    \caption{Forecast MAE versus horizon on the test year.}
+    \label{fig:forecast_horizon}
+\end{figure}
+
+Forecasting runs in the cloud because training requires years of history and, for the TFT, a GPU, whereas the meter only needs to report the 15-min values it already produces (768 bytes per day). The forecasts are produced by a job scheduled every 15~min on cloud CPUs, which returns the updated forecasts to each meter, so the meter spends neither processing time nor energy on forecasting. At inference time the models are lightweight (Table~\ref{tab:forecast_compute}): on a single CPU thread, a forecast takes 5.4~ms per horizon for the GBM, 2.1~ms for all 96 horizons for the LSTM, and 74~ms for the TFT including the overhead of the Darts interface. One CPU core can therefore refresh the 15-min and 1-h GBM forecasts of about 83{,}000 meters, or the day-ahead TFT forecasts of more than 12{,}000 meters, every 15~min. Training takes a few seconds per GBM model, about 1.4~min per LSTM seed and about 45~min per TFT seed on one GPU.
+
+\begin{table}[!t]
+\centering
+\caption{Computational cost of the forecasting models.}
+\label{tab:forecast_compute}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Model & Parameters & Size & Latency & Meters per core & Training per seed \\
+\midrule
+GBM & -- & -- & 5.4~ms per horizon & $\approx$83{,}000\textsuperscript{a} & $\approx$5~s per horizon \\
+LSTM & 54{,}208 & 212~kB & 2.1~ms (96 horizons) & 432{,}758 & 1.4~min \\
+TFT & 230{,}061 & 899~kB & 73.6~ms (96 horizons) & 12{,}229 & $\approx$45~min \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize \textsuperscript{a} 15-min and 1-h models (two predictions per meter and interval).} \\
+\end{tabular}
+\end{table}
+
+Because metrology, harmonic analysis and NILM run on the meter, a loss of connectivity affects only the forecasts. During an outage the meter keeps buffering its 15-min values locally and uploads them when the connection returns, so no data are lost. Each cloud forecast covers the next 24~h, and the meter keeps the most recent one: after $k$ intervals without connection, the cached forecast for the next hour is $k + 4$ intervals old. Alternatively, the meter can compute simple forecasts locally from its own measurements, namely persistence, seasonal naive or ARIMA(1,1,0), which needs a single coefficient. This analysis requires a forecast for every horizon and therefore uses the direct multi-horizon models; of these, the LSTM was more accurate at 1~h on the validation year and is used here. Table~\ref{tab:forecast_outage} and Figure~\ref{fig:forecast_outage} show the 1-h-ahead accuracy as a function of the outage duration in the test year. The cached cloud forecast degrades slowly, from 155.9~W MAE when connected (seed-averaged forecast) to 164.3~W on average over a 24-h outage, and it remains more accurate than the best local forecast, ARIMA(1,1,0) at 192.4~W, for as long as it covers the target, i.e. for up to 23~h. The meter therefore uses the cached forecast first and falls back to the local ARIMA(1,1,0) forecast only when the outage outlasts the cached horizon, choosing the source at each elapsed interval according to its accuracy on the validation year (hybrid strategy in Table~\ref{tab:forecast_outage}); over a three-day outage the mean error of this strategy is 183.0~W, still below that of the local forecast alone.
+
+\begin{table}[!t]
+\centering
+\caption{Forecast MAE during cloud outages.}
+\label{tab:forecast_outage}
+\begin{tabular}{lccc}
+\toprule
+Outage & Cached cloud forecast & On-meter ARIMA(1,1,0) & Hybrid \\
+\midrule
+15 min & 155.9 & 192.4 & 155.9 \\
+1 h & 159.6 & 192.4 & 159.6 \\
+6 h & 162.4 & 192.4 & 162.4 \\
+24 h & 164.3 & 192.4 & 164.3 \\
+3 days & 183.0 & 192.4 & 183.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/forecast_cloud_outage.png}
+    \caption{Forecast MAE versus elapsed outage time.}
+    \label{fig:forecast_outage}
+\end{figure}
 
 \subsection{Non-Intrusive Load Monitoring}
 \label{subsec:nilm}
