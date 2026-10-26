@@ -1472,6 +1472,27 @@ The NILM evaluation has the following limits. The SustDataED2 aggregate is the s
 
 The hardware is an uncertified proof-of-concept prototype. Power was read with a multimeter and is reported at board level; no formal thermal measurements, environmental tests, surge tests (IEC 61000-4-5) or certification under IEC 62052-11 and IEC 62053-21 were performed, and creepage and clearance distances were not verified. The harmonic measurement was verified on synthetic signals and cross-checked, but not against a certified power-quality analyzer. The concurrent operation of metrology, display, tamper detection and communication during an inference run has not been measured, and the results of the 24-h soak test are limited to a single run of that duration.
 
+The measurements that are still missing are defined as a validation plan in Table~\ref{tab:validation_plan}; each test states what is measured, how, and the reference or criterion that decides whether the prototype passes. The criteria of the first four tests are proposed targets of the authors, not requirements of a standard.
+
+\begin{table*}[!t]
+\centering
+\caption{Validation plan for the measurements that were not carried out on the prototype.}
+\label{tab:validation_plan}
+\footnotesize
+\begin{tabular}{@{}p{3.1cm}p{4.0cm}p{4.6cm}p{4.6cm}@{}}
+\toprule
+Test & Quantity measured & Method & Reference or criterion \\
+\midrule
+Concurrent operation & Cycle time and CPU share of metrology, harmonic analysis, display, tamper detection and communication while an inference runs & Log the task periods over 24~h with and without inference on the complete meter & No missed metrology samples and unchanged task periods during inference \\
+Thermal behavior & SoC package temperature during sustained inference & External thermocouple on the package, repeated inference runs in the closed enclosure at room temperature & Below the maximum operating temperature in the SoC datasheet, with no throttling of the inference time \\
+Long-duration stability & Resident memory, inference time and file-system errors & Log at every reporting interval for at least 7~days & No monotonic growth of memory, no change of the inference time beyond the 0.03~s spread already observed, no file-system errors \\
+Power budget & Current of each subsystem and efficiency of the AC/DC converter & In-line current measurement at each supply rail and a power analyzer at the mains input, in the idle, buffering and inference states & Subsystem breakdown that sums to the measured total; efficiency as DC output over AC input \\
+Equal-workload comparison & Energy per inference of the same INT8 model on the three platforms & Run the same NCNN model and window on the Raspberry Pi 4, the Raspberry Pi Zero 2W and the F1C200s with the same peripherals connected & Energy per inference and inferences per watt-hour under one workload \\
+Harmonic reference & THD and individual harmonics of voltage and current against a calibrated power-quality analyzer & Simultaneous measurement of the same loads, including the 47~W non-linear load & IEC 61000-4-7 Class I: $\pm5\%$ of the reading for components above 1\% (voltage) or 3\% (current) of the nominal value \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \textbf{Cybersecurity Limitations and Future Work.} The prototype uses JWT-based authentication for protected web routes and API-backed consumption data, TLS, and physical enclosure-tampering detection; these measures are not a complete cybersecurity assurance framework, and the embedded Linux platform and cloud-connected architecture remain exposed to unauthorized access, compromised credentials, malicious firmware and network-level attacks. Future work includes penetration testing of the firmware, communication interfaces, backend APIs and applications; cryptographic signature verification of firmware updates; device identities with mutual authentication; secure boot and a verified update chain, subject to bootloader support on the F1C200s; and centralized security-event monitoring and alerting. These measures will be evaluated through security testing and resource-overhead measurements before being claimed as implemented.
 
 Several further limitations remain. The single core of the F1C200s is saturated while an inference runs (99.81\% average), but inference runs once per 15-minute interval and takes 101--123~s (an 11--14\% duty cycle), so the saturation is confined to about two minutes in every fifteen; running the metrology, display and communication tasks concurrently at low priority is the design intent, and its measurement under load is part of the planned field validation. The batch implementation delivers results about two minutes after each interval and does not target sub-minute event detection; an incremental, activation-caching implementation is a natural next step. The energy demand forecasting module relies on cloud offloading, which preserves edge resources but makes predictive analytics depend on network connectivity.
@@ -1581,6 +1602,36 @@ TFT & 230{,}061 & 899~kB & 73.6~ms (96 horizons) & 12{,}229 & $\approx$45~min \\
 \end{tabular}
 \end{table}
 
+
+\subsection*{Reproducibility Details of the NILM Experiments}
+Table~\ref{tab:repro} lists the software versions, the window counts of the chronological splits (one window is 512 samples at 8~s) and the checksums of the six deployed checkpoints, so that the reported results can be traced to the exact files used. Training seeds (2026--2030), the optimizer settings, the 500-window calibration sets, the 15~W state threshold and the bootstrap settings are given in the main text. The hardware used for training was an NVIDIA RTX 3050 6~GB laptop GPU, and the INT8 evaluation on the PC used the NCNN CPU back end with one thread per process.
+
+\begin{table}[!t]
+\centering
+\caption{Software versions, split sizes and checksums of the deployed checkpoints.}
+\label{tab:repro}
+\footnotesize
+\begin{tabular}{@{}p{2.3cm}p{5.7cm}@{}}
+\toprule
+\multicolumn{2}{l}{\textit{Software}} \\
+Environment & Python 3.12.0, PyTorch 2.6.0 (CUDA 12.4), NumPy 1.26.4 \\
+Deployment & PNNX 20260526, NCNN 1.0 (build 20260526) \\
+\midrule
+\multicolumn{2}{l}{\textit{Windows per split (train / validation / test)}} \\
+REFIT & 380{,}224 / 18{,}689 / 59{,}927 \\
+SustDataED2 & 1{,}416 / 303 / 304 \\
+UK-DALE & 11{,}610 / 2{,}488 / 2{,}488 \\
+\midrule
+\multicolumn{2}{l}{\textit{SHA-256 of the checkpoint files (first 16 hexadecimal digits)}} \\
+REFIT, regression & f3e16762ce763163 \\
+SustDataED2, regression & 6739d309cffd5585 \\
+UK-DALE, regression & 6c743e9c7c331a78 \\
+REFIT, classification & b5408c030b2b4508 \\
+SustDataED2, classification & 1ac6a0a9d5136d90 \\
+UK-DALE, classification & 4a8d8dfc9bf5f326 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \bibliography{msample.bib}
 
