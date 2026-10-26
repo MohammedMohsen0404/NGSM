@@ -344,6 +344,24 @@ Memory Usage Active (\%) & 5.00 & 43.91 & 48.92 & N/A \\ \bottomrule
 \end{tabular}
 \end{table*}
 
+For the third generation, Table~\ref{tab:power_states} gives the operating states of the complete meter (all hardware connected). The ranges were read at the 5~V input and are consistent with the values of Table~\ref{tab:hardwarebenchmarks} (idle 86.00~mA, active 102.68~mA, 66.77\% memory during inference). They are board-level values of the whole meter: the contribution of the individual subsystems (processor, STPM33, display, analog front end, storage, communication) and the supply efficiency of the AC/DC converter were not measured separately, and the power at the mains side was not measured.
+
+\begin{table}[!t]
+\centering
+\caption{Operating states of the complete third-generation meter, measured at the 5~V input (power = current $\times$ 5~V).}
+\label{tab:power_states}
+\footnotesize
+\begin{tabular}{@{}p{2.3cm}cccc@{}}
+\toprule
+State & Current (mA) & Power (W) & CPU (\%) & Memory (\%) \
+\midrule
+Idle (no application) & 77--88 & 0.385--0.440 & 0--1 & $\approx$32 \
+Active, data loading and buffering & 100--115 & 0.500--0.575 & 80--90 & 46--50 \
+Active inference (peak) & 100--140 & 0.500--0.700 & 100 & 55--73 \
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Software Components}
 \label{sec:software}
 
