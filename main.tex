@@ -799,7 +799,7 @@ UK-DALE & 1 & 17.30 & 88.29 & 0.282 & 0.573 & 0.415 & 0.739 & 0.531 \\
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.60\textwidth]{figures/cross_dataset_comparison.png}
-\caption{(a) MAE and (b) F1-score on the three datasets: bars show the retrained EDTCN (mean $\pm$ std over seeds) and diamonds the deployed checkpoints (single run). The difference in MAE between datasets reflects the appliance mix, the aggregate signal (sum of metered appliances in SustDataED2, measured mains with unmetered load in REFIT and UK-DALE) and the household variability, and should not be read as a difference in model quality.}
+\caption{MAE (bars) and pooled F1-score at 15~W (line) of the deployed EDTCN checkpoints on the test split of each dataset; the multi-seed results of the retrained models are given in Table~\ref{tab:overall_performance}. The difference in MAE between datasets reflects the appliance mix, the aggregate signal (sum of metered appliances in SustDataED2, measured mains with unmetered load in REFIT and UK-DALE) and the household variability, and should not be read as a difference in model quality.}
 \label{fig:cross_dataset_comparison}
 \end{figure}
 
@@ -884,7 +884,7 @@ Toaster & C & 0.5 & 13.20 & 47.9 & 0.78 & 0.224 & 0.128 & 0.896 \\
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.60\textwidth]{figures/SustDataED2_per_appliance_mae.png}
-\caption{Per-appliance MAE (left) and F1 (right) of the deployed model on the SustDataED2 test set, for the appliances that are ON at least once in the test split (bars colored by F1). Fridge-Freezer, Freezer and Kettle are detected reliably; low-power and rarely active appliances remain challenging.}
+\caption{Per-appliance MAE of the deployed model on the SustDataED2 test set, for the appliances that are ON at least once in the test split (bars colored by the F1 at 15~W, which is also printed under each appliance). Fridge-Freezer, Freezer and Kettle are detected reliably; low-power and rarely active appliances remain challenging.}
 \label{fig:SustDataED2_results}
 \end{figure}
 
@@ -956,7 +956,7 @@ The EDTCN is also the most computationally demanding of the compared networks (3
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/baseline_mae_comparison.png}
-\caption{MAE of the EDTCN and of three baselines trained under the identical protocol (mean $\pm$ std over seeds; REFIT uses the reduced protocol). Baselines are grey, EDTCN variants blue.}
+\caption{MAE of the EDTCN and of three baselines trained under the identical protocol (mean $\pm$ std over seeds; REFIT uses the reduced protocol). Baselines are blue, EDTCN variants green; values above the bars are the mean MAE in W.}
 \label{fig:baseline_comparison}
 \end{figure}
 
