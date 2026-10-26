@@ -252,7 +252,6 @@ Figure \ref{fig:gen2_final} presents the final hardware assembly connected to th
 The third generation of the NGSM architecture was developed to move the system from a functional prototype toward a lower-power, lower-cost and more compact design. This iteration focuses on high-density integration, supply chain independence, and software reliability; it remains an uncertified proof-of-concept prototype (see the paragraph on prototype status below). The core of this architecture is a custom-fabricated Printed Circuit Board (PCB) design centered around the Allwinner F1C200s System on Chip (SoC) \cite{f1c200s}.
 
 The selection of the Allwinner F1C200s was driven by the necessity for a highly integrated embedded controller capable of supporting multimedia interfaces while maintaining a minimal hardware footprint. The F1C200s (implemented on the MangoPi R3 board \cite{mangopi}) features an ARM926EJ-S core clocked at 420 MHz and integrates 64MB of DDR1 memory directly within the SoC package. This System-in-Package (SiP) design eliminates the need for external RAM modules, significantly reducing the Bill of Materials (BOM) complexity and minimizing trace length susceptibility to electromagnetic interference (EMI). The third generation replaced the main SoC of the second generation (Raspberry Pi Zero) by the F1C200S, which has a much lower cost and a lower power consumption, but the SoC has hardware limitations. One of them is that it provides a single SPI bus. This seems unproblematic at first, because SPI is a multi-slave bus, but the STPM33 works in SPI mode 3 while the TFT display works in mode 0, which causes interference when both are on the same bus, even with the chip select of the idle device disabled, so some kind of isolation was required. Two solutions were tried, a demultiplexer and a tri-state buffer, and in the end a software SPI was used because of (1) a hardware issue in the demultiplexer used, (2) cost reduction and (3) PCB optimization to reduce space.
-% TODO(author): confirm that the display (not the STPM33) is the device on the software SPI.
 
 To ensure long-term operational reliability, the storage architecture was migrated from removable SD cards to an onboard SPI NAND Flash memory chip. This change addresses the data integrity risks associated with mechanical contact failure and file system corruption common in consumer-grade storage media. The software environment was strictly optimized through a custom embedded Linux deployment generated via the Buildroot automation system. To utilize the F1C200s effectively, the Device Tree Source (DTS) was manually reconfigured. Conflicting multimedia modules, specifically the LCD controller, TV encoder, and Camera interface, were disabled to release system resources and interrupt lines. This customization enabled the dedication of the high-speed hardware SPI1 controller to the metrology interface on Port E, ensuring reliable communication with the STPM33. Furthermore, the bootloader sequence was customized using U-Boot with specific offsets to support the proprietary partition table. For connectivity, the kernel capabilities were expanded to support USB On-The-Go (OTG) and RNDIS Ethernet gadget modes, facilitating secure local SSH access for system maintenance without requiring external network infrastructure.
 
@@ -275,24 +274,23 @@ The physical implementation achieves a high degree of miniaturization by integra
     \label{fig:gen3_schematic}
 \end{figure}
 
-The layout keeps the AC inputs and the low-voltage digital signals in separate regions of the board to preserve signal integrity for the STPM33 analog front end; creepage and clearance distances were not verified against a standard (see below). The custom PCB is a carrier board: it hosts the MangoPi module with the F1C200s on its pin header and carries the STPM33 interface, the TFT connector, the tamper switch, the buttons and indicator LED, and the Hi-Link AC/DC converter (Figures~\ref{fig:gen3_pcb_schematic} and \ref{fig:gen3_pcb_3d}). Power and latency were measured on all three hardware generations.
-% TODO(author): state explicitly whether the Gen 3 power/latency figures were measured with the MangoPi module on the custom carrier PCB or on the MangoPi board alone.
+The layout keeps the AC inputs and the low-voltage digital signals in separate regions of the board to preserve signal integrity for the STPM33 analog front end; creepage and clearance distances were not verified against a standard (see below). The custom PCB is a carrier board: it carries the MangoPi board with the F1C200s, which is soldered onto it, and carries the STPM33 interface, the TFT connector, the tamper switch, the buttons and indicator LED, and the Hi-Link AC/DC converter (Figures~\ref{fig:gen3_pcb_schematic} and \ref{fig:gen3_pcb_3d}). Power and latency were measured on all three hardware generations; for the third generation they were measured on the custom PCB with the MangoPi board soldered onto it, not on the MangoPi board alone.
 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/gen3_pcb_schematic.jpg}
-    \caption{Schematic of the third-generation carrier PCB: F1C200s (MangoPi) pin header, STPM33 and TFT connectors, switches and indicator LED, and the Hi-Link AC/DC converter.}
+    \caption{Schematic of the third-generation carrier PCB: F1C200s (MangoPi) connections, STPM33 and TFT connectors, switches and indicator LED, and the Hi-Link AC/DC converter.}
     \label{fig:gen3_pcb_schematic}
 \end{figure}
 
 \begin{figure}[!t]
     \centering
     \includegraphics[width=0.60\textwidth]{figures/gen3_pcb_3d.png}
-    \caption{3D model of the third-generation custom PCB with the MangoPi module on its header.}
+    \caption{3D model of the third-generation custom PCB with the MangoPi board soldered onto it.}
     \label{fig:gen3_pcb_3d}
 \end{figure}
 
-Table~\ref{tab:bom} lists the bill of materials of the prototype at single-unit prices. The chip and module cost is USD~94.40, the board-level parts and the custom PCB add USD~20.55 and the enclosure USD~3.00, giving USD~117.95 for the complete prototype meter. The prices of the PCB and enclosure are estimates, and no volume pricing is assumed, so the table is not a cost estimate for a volume-produced meter.
+Table~\ref{tab:bom} lists the bill of materials of the prototype at single-unit prices. The two evaluation boards (MangoPi with the F1C200s, USD~19.60, and STPM33, USD~74.80) cost USD~94.40, the board-level parts and the custom PCB add USD~20.55 and the enclosure USD~3.00, giving USD~117.95 for the complete prototype meter. The prices of the PCB and enclosure are estimates, and no volume pricing is assumed, so the table is not a cost estimate for a volume-produced meter.
 
 \begin{table*}[!t]
 \centering
@@ -303,8 +301,8 @@ Table~\ref{tab:bom} lists the bill of materials of the prototype at single-unit 
 \toprule
 Level & Part & Specification & Supplier / source & Qty & Unit (USD) & Total (USD) \\
 \midrule
-Chip / IC & Processing & Allwinner F1C200S SoC / development board & CNX Software / Widora & 1 & 19.60 & 19.60 \\
-Chip / IC & Metrology & STPM33TR metering IC unit & STMicroelectronics & 1 & 74.80 & 74.80 \\
+Eval. board & Processing & MangoPi board (Allwinner F1C200S evaluation board) & CNX Software / Widora & 1 & 19.60 & 19.60 \\
+Eval. board & Metrology & STPM33 evaluation board (STPM33TR) & STMicroelectronics & 1 & 74.80 & 74.80 \\
 Board & Power supply & Hi-Link HLK-PM03 AC/DC converter (3.3~V) & ElectronicsComp & 1 & 1.75 & 1.75 \\
 Board & Display & ST7735S TFT screen & ST display vendor & 1 & 13.00 & 13.00 \\
 Board & Tamper detection & Limit switch & generic & 1 & 0.20 & 0.20 \\
@@ -317,10 +315,8 @@ Complete meter & Enclosure & Molded plastic housing$^{*}$ & generic & 1 & 3.00 &
 \bottomrule
 \end{tabular}
 \end{table*}
-% TODO(author): the F1C200S board is listed at USD 19.60 here but at USD 16 (MangoPi) in Table 2; the STPM33TR is listed at USD 74.80 (please confirm whether this is the IC or an evaluation unit).
 
-\paragraph{Prototype status and measurement conditions} It is important to note that the current implementation serves as a functional Proof of Concept (PoC) to validate the core architecture and measurement algorithms. While the hardware demonstrates reliable benchtop performance, it is currently an uncertified prototype. Full industrial commercialization---including strict adherence to creepage and clearance distances, formal surge protection testing per IEC 61000-4-5, and complete certification under standards such as IEC 62052-11 and IEC 62053-21---remains a key objective for future work prior to field deployment. Formal thermal measurements during sustained workloads were not conducted at this stage; the hardware serves strictly as an early-stage proof of concept focused on functional validation, and rigorous environmental and thermal stress testing will be addressed in future development phases. To evaluate long-term system reliability and stability, we conducted a 24-hour continuous operation (soak) test. Furthermore, to optimize inter-process communication (IPC) efficiency and reduce storage I/O overhead, we migrated from file-system-based communication to robust Message Queues and Shared Memory mechanisms. The power measurement method was to measure voltage and current with an avometer (multimeter) at the 5~V supply input of each generation, so the values carry the accuracy of that instrument.
-% TODO(author): add the outcome of the 24-h soak test (RAM over time, inference time over time, filesystem errors) and the instrument model of the multimeter.
+\paragraph{Prototype status and measurement conditions} It is important to note that the current implementation serves as a functional Proof of Concept (PoC) to validate the core architecture and measurement algorithms. While the hardware demonstrates reliable benchtop performance, it is currently an uncertified prototype. Full industrial commercialization---including strict adherence to creepage and clearance distances, formal surge protection testing per IEC 61000-4-5, and complete certification under standards such as IEC 62052-11 and IEC 62053-21---remains a key objective for future work prior to field deployment. Formal thermal measurements during sustained workloads were not conducted at this stage; the hardware serves strictly as an early-stage proof of concept focused on functional validation, and rigorous environmental and thermal stress testing will be addressed in future development phases. To evaluate long-term system reliability and stability, we conducted a 24-hour continuous operation (soak) test. Furthermore, to optimize inter-process communication (IPC) efficiency and reduce storage I/O overhead, we migrated from file-system-based communication to robust Message Queues and Shared Memory mechanisms. The power measurement method was to measure voltage and current with a UNI-T UT61A digital multimeter at the 5~V supply input of each generation, with all hardware of the meter connected in the third generation, so the values carry the accuracy of that instrument and no sampling interval or averaging period applies. The 24-hour soak test lasted more than 24~hours with all functionalities running; the upload of readings to the head-end system was enabled while the receiving server was inactive during the test. Quantitative logs of memory use and inference time over the run, and the power at the mains side of the AC/DC converter, are not reported.
 
 
 
@@ -329,7 +325,6 @@ Complete meter & Enclosure & Molded plastic housing$^{*}$ & generic & 1 & 3.00 &
 
 To quantify efficiency across generations, benchmarks compared First (Raspberry Pi 4 Model B 8 GB RAM), Second (Raspberry Pi Zero 2W 512MB RAM), and Third (MangoPi with Allwinner F1C200s) platforms. All power measurements were recorded at a supply voltage of 5V. As detailed in Table \ref{tab:hardwarebenchmarks}, the evaluation reports idle and active current draw (mA), active CPU load (percentage), and active memory usage (percentage) across hardware generations.
 
-% TODO(author): the 0.513 W measurement includes the TFT display; confirm whether the STPM33 metrology board was also connected.
 \begin{table*}[!t]
 \centering
 \caption{Hardware specifications and performance comparison across NGSM generations (supply voltage 5\,V, current measured at the supply input of the processing platform).}
@@ -343,15 +338,15 @@ Metric & Gen 1 & Gen 2 & Gen 3 & Improvement (\%) \\
 Processor & Quad Cortex-A72 & Quad Cortex-A53 & Single ARM926EJ-S & -- \\
 Clock Speed & 1.8 GHz & 1.0 GHz & 420 MHz & -- \\
 Total Memory & 8 GB LPDDR4 & 512 MB SDRAM & 64 MB DDR & -- \\ 
-Unit Cost (USD) & 75 & 15 & 16 & -- \\ \midrule
+Unit Cost (USD) & 75 & 15 & 19.60 & -- \\ \midrule
 \multicolumn{5}{l}{Measured Performance} \\
 Power Idle (mA) & 542.26 & 134.24 & 86.00 & 35.93\% \\
 Power Active (mA) & 695.68 & 361.48 & 102.68 & 71.59\% \\
 Power Active (W) & 3.48 & 1.81 & 0.513 & 71.59\% \\
 CPU Load Active (\%) & 75.35 & 75.29 & 84.31 & N/A \\
 Memory Usage Active (\%) & 5.00 & 43.91 & 48.92 & N/A \\ \bottomrule
-\multicolumn{5}{l}{\footnotesize Notes: Unit cost is the retail development-board price at the time of the benchmark (Gen 3: MangoPi board, \$16). The STPM33 front end,} \\
-\multicolumn{5}{l}{\footnotesize display, power supply, enclosure and the custom PCB are additional (complete prototype: Table~\ref{tab:bom}). The Gen 3 current includes the TFT display.} \\
+\multicolumn{5}{l}{\footnotesize Notes: Unit cost is the retail development-board price at the time of the benchmark (Gen 3: MangoPi board, \$19.60). The STPM33 front end,} \\
+\multicolumn{5}{l}{\footnotesize display, power supply, enclosure and the custom PCB are additional (complete prototype: Table~\ref{tab:bom}). The Gen 3 current was measured with the TFT display, the STPM33 and all other hardware of the meter connected.} \\
 \multicolumn{5}{l}{\footnotesize Active and idle currents were read with a multimeter at the 5\,V supply input of each platform under comparable benchmarking workloads; the CPU and memory rows refer to this} \\
 \multicolumn{5}{l}{\footnotesize benchmark workload, not to NILM inference (on the F1C200s, NILM inference uses 99.8\% CPU and 66.8\% memory, Section~\ref{subsubsec:latency}).} \\
 \multicolumn{5}{l}{\footnotesize Power (W) = current (mA) $\times$ 5\,V / 1000. Active power of Gen 3 is 71.6\% below Gen 2 and 85.3\% below Gen 1; idle current is 35.9\% below Gen 2.}
@@ -1331,8 +1326,30 @@ The complete pipeline, from PyTorch training to ARM binary deployment, required 
 \paragraph{Accuracy of the quantized models}
 The accuracy of the FP32 and INT8 networks is evaluated on the complete test splits (Table~\ref{tab:int8_pc}) with the same NCNN network files that are deployed; this evaluation, and not a subset, is the basis of the accuracy statements of this paper. The FP32 NCNN models reproduce the metrics of the trained PyTorch checkpoints exactly (REFIT 15.66~W and F1 0.448, SustDataED2 5.25~W and 0.824, UK-DALE 17.30~W and 0.531), so the conversion to NCNN is lossless, and the INT8 changes are those quantified in Section~\ref{subsubsec:deployment_details}: regression models stay within 0.4\% (mixed precision) or within 2.5\% (all layers in INT8 with ACIQ clipping) of the FP32 MAE, and the classification models need the input and output convolutions in FP32 to stay close to the FP32 macro-F1.
 
+\paragraph{Soft-float ARM build of the rebuilt models}
+The NCNN inference engine was also cross-compiled for the ARM926EJ-S without NEON and with software floating point (\texttt{-mcpu=arm926ej-s -mfloat-abi=soft}, statically linked). The resulting binary contains no hardware floating-point instructions, so the remaining floating-point operations (input scaling, quantization scales, de-quantization) are executed by soft-float routines, as described in Stage 4. Executed on a PC with an ARM926EJ-S CPU model (not on the F1C200s board) on 50 evenly spaced test windows per model, it reproduces the outputs of the PC build for the same model files (Table~\ref{tab:arm_build}): the mean absolute difference is below $5\times10^{-4}$ (W or probability) for all models, the ON/OFF decisions are identical in at least 99.996\% of the output samples, and the largest single difference is 1.2~W, which corresponds to isolated one-step differences in the INT8 rounding of the soft-float arithmetic; the outputs are not bit-identical. These runs establish functional agreement of the ARM build; no timing, power or temperature is derived from them.
+
+\begin{table}[!t]
+\centering
+\caption{Agreement between the soft-float ARM926EJ-S build and the PC build of the rebuilt INT8 models (50 evenly spaced test windows per model; same NCNN model files). Each cell gives the largest absolute difference / the mean absolute difference of the outputs / the percentage of identical ON/OFF decisions. The ARM build was executed on a PC with an ARM926EJ-S CPU model, not on the F1C200s board.}
+\label{tab:arm_build}
+\footnotesize
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Dataset & Model (unit) & INT8 all layers (ACIQ) & INT8 mixed precision \
+\midrule
+REFIT & Reg. (W) & $1.172$ / $4.0	imes10^{-4}$ / 100.000 & $0.246$ / $6.7	imes10^{-5}$ / 99.998 \\
+SustDataED2 & Reg. (W) & $1.2	imes10^{-4}$ / $2.0	imes10^{-7}$ / 100.000 & $1.180$ / $3.9	imes10^{-4}$ / 100.000 \\
+UK-DALE & Reg. (W) & $2.4	imes10^{-4}$ / $3.0	imes10^{-7}$ / 100.000 & $0.651$ / $8.5	imes10^{-5}$ / 100.000 \\
+REFIT & Cls. (prob.) & $0.014$ / $9.8	imes10^{-6}$ / 100.000 & $0.011$ / $3.1	imes10^{-6}$ / 100.000 \\
+SustDataED2 & Cls. (prob.) & $0.014$ / $2.5	imes10^{-6}$ / 100.000 & $6.1	imes10^{-3}$ / $3.2	imes10^{-6}$ / 99.999 \\
+UK-DALE & Cls. (prob.) & $0.015$ / $1.2	imes10^{-5}$ / 99.998 & $0.021$ / $5.2	imes10^{-5}$ / 99.997 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Hardware Deployment Summary}
-The deployment validation supports four conclusions. (1) \textbf{Accuracy}: quantization to INT8 changes the regression MAE by at most a few percent and, with mixed precision, by less than 0.4\% on all three datasets, evaluated on the complete test splits. (2) \textbf{Size}: the weights shrink 3.9 times to 0.72--0.98~MB. (3) \textbf{Execution on the F1C200s}: one 512-step window is processed in 101--123~s with 66.77\% memory utilization and 0.513~W board-level power, i.e.\ 33--40 times faster than the data rate and an 11--14\% CPU duty cycle at a 15-minute cadence; these on-device values were measured with the earlier deployment build of the networks. (4) \textbf{Pipeline}: the chain PyTorch training $\rightarrow$ PNNX $\rightarrow$ NCNN INT8 $\rightarrow$ ARM binary required no change of the network architecture, apart from expressing the 1-D convolutions as equivalent 2-D convolutions so that the NCNN tools can quantize them.
+The deployment validation supports four conclusions. (1) \textbf{Accuracy}: quantization to INT8 changes the regression MAE by at most a few percent and, with mixed precision, by less than 0.4\% on all three datasets, evaluated on the complete test splits. (2) \textbf{Size}: the weights shrink 3.9 times to 0.72--0.98~MB. (3) \textbf{Execution on the F1C200s}: one 512-step window is processed in 101--123~s with 66.77\% memory utilization and 0.513~W board-level power, i.e.\ 33--40 times faster than the data rate and an 11--14\% CPU duty cycle at a 15-minute cadence; these on-device values were measured with the earlier deployment build of the networks. (4) \textbf{Pipeline}: the chain PyTorch training $\rightarrow$ PNNX $\rightarrow$ NCNN INT8 $\rightarrow$ ARM binary required no change of the network architecture, apart from expressing the 1-D convolutions as equivalent 2-D convolutions so that the NCNN tools can quantize them; the soft-float ARM build of the rebuilt models agrees with the PC build (Table~\ref{tab:arm_build}).
 
 \subsubsection{Summary and Key Findings}
 \label{subsubsec:nilm_summary}
