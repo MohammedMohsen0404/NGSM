@@ -830,7 +830,7 @@ The multi-seed results are tight: the standard deviation of the MAE across seeds
 \caption{Per-appliance results of the deployed SustDataED2 model on the test split (304 windows). ON (\%) is the fraction of test time the appliance is above 15~W; SAE and NDE are undefined (--) for appliances that are never ON in the test split. Device types: A always-on/cycling, B regular-use, C burst. The precision, recall and F1 of the Fridge-Freezer and the Kettle agree to two decimals by coincidence (unrounded: 0.8818/0.9952/0.9350 and 0.8819/0.9957/0.9354); the Kettle is ON in only 0.7\% of the test time.}
 \label{tab:SustDataED2_per_appliance}
 \footnotesize
-\begin{tabular}{@{}lccccccc@{}}
+\begin{tabular}{@{}lcccccccc@{}}
 \toprule
 Appliance & Type & ON (\%) & MAE (W) & SAE (\%) & NDE & F1 & Prec. & Recall \\
 \midrule
@@ -855,7 +855,7 @@ VacuumCleaner & C & 0.1 & 1.54 & 24.4 & 0.98 & 0.050 & 0.026 & 0.701 \\
 \caption{Per-appliance results of the deployed REFIT model on the unseen test houses 19--21 (59,927 windows). Device types follow the dataset package: A always-on/cycling, B regular-use, C burst.}
 \label{tab:refit_per_appliance}
 \footnotesize
-\begin{tabular}{@{}lccccccc@{}}
+\begin{tabular}{@{}lcccccccc@{}}
 \toprule
 Appliance & Type & ON (\%) & MAE (W) & SAE (\%) & NDE & F1 & Prec. & Recall \\
 \midrule
@@ -877,7 +877,7 @@ Microwave & C & 0.2 & 5.07 & 11.9 & 0.95 & 0.108 & 0.058 & 0.763 \\
 \caption{Per-appliance results of the deployed UK-DALE model on the House 1 test split (2,488 windows). The 12-appliance configuration includes networking equipment and lighting, going beyond common NILM benchmarks.}
 \label{tab:ukdale_per_appliance}
 \footnotesize
-\begin{tabular}{@{}lccccccc@{}}
+\begin{tabular}{@{}lcccccccc@{}}
 \toprule
 Appliance & Type & ON (\%) & MAE (W) & SAE (\%) & NDE & F1 & Prec. & Recall \\
 \midrule
