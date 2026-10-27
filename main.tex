@@ -913,7 +913,7 @@ To isolate the contribution of each design choice, ten variants were trained wit
 
 \textit{Architecture.} Dilation is the decisive ingredient: adding exponentially dilated convolutions to a plain 6-block TCN (EDTCN with the same MSE+MAE loss) lowers the MAE from 5.58 to 4.99~W on SustDataED2 (11\%) and from 16.22 to 14.29~W on UK-DALE (12\%), and raises the F1 from 0.746 to 0.830 and from 0.534 to 0.560. Residual connections need dilation to be useful: without it they do not improve the plain TCN (6.61 and 17.54~W) and make training less stable (F1 standard deviation 0.18 across seeds on SustDataED2). Extending the receptive field from 67 to 259 steps (4 to 6 blocks) has no measurable effect on SustDataED2 (4.92 versus 4.99~W) but reduces the UK-DALE error from 15.48 to 14.29~W, in line with its long washing-machine and dishwasher cycles.
 
-\textit{Loss function.} With the 6-block EDTCN fixed, MAE as the training loss gives the lowest MAE (4.68~W and 13.51~W) but underestimates the energy: its SAE is 0.46 and 0.54, about 2.5 times that of the other losses (0.18--0.25), with high precision and low recall. The standard focal loss ($\gamma=2$) is the weakest objective on both datasets. The remaining losses (MSE+MAE, MSE, type-weighted MSE and the proposed device-type-weighted focal loss) lie within 0.4~W (SustDataED2) and 0.8~W (UK-DALE) of each other; within the focal family, the device-type weights help on UK-DALE (15.01 versus 15.25~W) and are neutral on SustDataED2 (focal loss without type weights: $-0.015$~W, interval $[-0.032,-0.001]$~W, far below the seed spread of 0.33~W; the asterisk in Table~ef{tab:ablation} marks statistical, not practical, significance). Compared with plain MSE+MAE the proposed loss has a slightly higher MAE but raises recall in all but one of the eight dataset--type groups (Table~\ref{tab:loss_by_type}), most clearly for regular-use appliances on REFIT (recall 0.52 to 0.71, F1 0.28 to 0.36) and burst appliances on SustDataED2 (0.38 to 0.46), while F1 stays within 0.01 elsewhere. It is therefore a recall-oriented objective for event-driven services that can be re-weighted per application, whereas the accuracy gain over prior architectures comes from the dilated residual architecture itself.
+\textit{Loss function.} With the 6-block EDTCN fixed, MAE as the training loss gives the lowest MAE (4.68~W and 13.51~W) but underestimates the energy: its SAE is 0.46 and 0.54, about 2.5 times that of the other losses (0.18--0.25), with high precision and low recall. The standard focal loss ($\gamma=2$) is the weakest objective on both datasets. The remaining losses (MSE+MAE, MSE, type-weighted MSE and the proposed device-type-weighted focal loss) lie within 0.4~W (SustDataED2) and 0.8~W (UK-DALE) of each other; within the focal family, the device-type weights help on UK-DALE (15.01 versus 15.25~W) and are neutral on SustDataED2 (focal loss without type weights: $-0.015$~W, interval $[-0.032,-0.001]$~W, far below the seed spread of 0.33~W; the asterisk in Table~\ref{tab:ablation} marks statistical, not practical, significance). Compared with plain MSE+MAE the proposed loss has a slightly higher MAE but raises recall in all but one of the eight dataset--type groups (Table~\ref{tab:loss_by_type}), most clearly for regular-use appliances on REFIT (recall 0.52 to 0.71, F1 0.28 to 0.36) and burst appliances on SustDataED2 (0.38 to 0.46), while F1 stays within 0.01 elsewhere. It is therefore a recall-oriented objective for event-driven services that can be re-weighted per application, whereas the accuracy gain over prior architectures comes from the dilated residual architecture itself.
 
 \begin{table*}[!t]
 \centering
@@ -1042,7 +1042,7 @@ Classification models achieve very high precision (>0.95) for high-power, consis
 Iteration & Loss Function & Appliances & F1 & Prec. & Recall & Key Improvement \\
 \midrule
 1 & Unweighted BCE & 9 & 0.394 & 0.410 & 0.384 & Baseline \\
-2 & Weighted BCE & 8 & 0.557 & -- & 0.744 & +41\% F1, +94\% Recall \\
+2 & Weighted BCE & 9 & 0.557 & -- & 0.744 & +41\% F1, +94\% Recall \\
 3 & Weighted BCE & 7 & 0.60-0.65 & 0.50-0.60 & 0.70-0.80 & Balanced metrics \\
 \bottomrule
 \multicolumn{7}{l}{\footnotesize Iteration 1: Learns prior distribution (always-OFF bias).} \\
@@ -1249,7 +1249,7 @@ To separate the effect of the compiler fusion from that of quantization, each re
 
 \begin{table}[!t]
 \centering
-\caption{Operator-fusion ablation of the regression models (same weights; REFIT on 3{,}000 evenly spaced test windows, the other datasets on the complete test split). Layers: unfused / BN folded / deployed. INT8 results use ACIQ calibration of all convolutions with the same 500 calibration windows. Latency: one window, one thread, PC, range over the three forms (FP32 / INT8), measured in the same way as in Table~ef{tab:int8_pc}.}
+\caption{Operator-fusion ablation of the regression models (same weights; REFIT on 3{,}000 evenly spaced test windows, the other datasets on the complete test split). Layers: unfused / BN folded / deployed. INT8 results use ACIQ calibration of all convolutions with the same 500 calibration windows. Latency: one window, one thread, PC, range over the three forms (FP32 / INT8), measured in the same way as in Table~\ref{tab:int8_pc}.}
 \label{tab:fusion}
 \footnotesize
 \begin{tabular}{@{}lcccc@{}}
