@@ -336,12 +336,8 @@ Power Active (mA) & 695.68 & 361.48 & 102.68 & 71.59\% \\
 Power Active (W) & 3.48 & 1.81 & 0.513 & 71.59\% \\
 CPU Load Active (\%) & 75.35 & 75.29 & 84.31 & N/A \\
 Memory Usage Active (\%) & 5.00 & 43.91 & 48.92 & N/A \\ \bottomrule
-\multicolumn{5}{l}{\footnotesize Notes: Unit cost is the retail development-board price at the time of the benchmark (Gen 3: MangoPi board, \$19.60). The STPM33 front end,} \\
-\multicolumn{5}{l}{\footnotesize display, power supply, enclosure and the custom PCB are additional (complete prototype: Table~\ref{tab:bom}). The Gen 3 current was measured with the TFT display, the STPM33 and all other hardware of the meter connected.} \\
-\multicolumn{5}{l}{\footnotesize Active and idle currents were read with a multimeter at the 5\,V supply input of each platform under comparable benchmarking workloads; the CPU and memory rows refer to this} \\
-\multicolumn{5}{l}{\footnotesize benchmark workload, not to NILM inference (on the F1C200s, NILM inference uses 99.8\% CPU and 66.8\% memory, Section~\ref{subsubsec:latency}).} \\
 \multicolumn{5}{l}{\footnotesize Power (W) = current (mA) $\times$ 5\,V / 1000. Active power of Gen 3 is 71.6\% below Gen 2 and 85.3\% below Gen 1; idle current is 35.9\% below Gen 2.}
-\end{tabular}
+\end{tabular}\par\smallskip\parbox{\linewidth}{\footnotesize Notes: Unit cost is the retail development-board price at the time of the benchmark (Gen 3: MangoPi board, \$19.60). The STPM33 front end, display, power supply, enclosure and the custom PCB are additional (complete prototype: Table~\ref{tab:bom}). The Gen 3 current was measured with the TFT display, the STPM33 and all other hardware of the meter connected. Active and idle currents were read with a multimeter at the 5\,V supply input of each platform under comparable benchmarking workloads; the CPU and memory rows refer to this benchmark workload, not to NILM inference (on the F1C200s, NILM inference uses 99.8\% CPU and 66.8\% memory, Section~\ref{subsubsec:latency}).}
 \end{table*}
 
 For the third generation, Table~\ref{tab:power_states} gives the operating states of the complete meter (all hardware connected). The ranges were read at the 5~V input and are consistent with the values of Table~\ref{tab:hardwarebenchmarks} (idle 86.00~mA, active 102.68~mA, 66.77\% memory during inference). They are board-level values of the whole meter: the contribution of the individual subsystems (processor, STPM33, display, analog front end, storage, communication) and the supply efficiency of the AC/DC converter were not measured separately, and the power at the mains side was not measured.
@@ -675,7 +671,7 @@ The model has 128 channels and 706,889 trainable parameters in the 9-appliance R
 \caption{Layer-by-layer description of the EDTCN (REFIT configuration, 9 appliances, batch dimension omitted). MACs are counted per 512-step window; $A$ is the number of appliances.}
 \label{tab:layers}
 \footnotesize
-\begin{tabular}{@{}llcccrr@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}llcccrr@{}}
 \toprule
 Block & Layers & Output size & Kernel & Dilation & Params & MACs (M) \\
 \midrule
@@ -691,10 +687,16 @@ Output heads ($A$ in parallel) & Conv1d$_{128\rightarrow32}$, ReLU, Dropout(0.2)
 \midrule
 Total ($A=9$) & & $512\times9$ & & & 706,889 & 377.8 \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table*}
 
-Given an aggregate sequence $\mathbf{x}\in\mathbb{R}^{B\times1\times T}$ with $T=512$, the input projection gives $\mathbf{h}_0=\mathrm{Dropout}(\mathrm{ReLU}(\mathrm{BN}(\mathrm{Conv1d}_{1\rightarrow128}(\mathbf{x}))))$, each residual block computes $\mathbf{h}_i=\mathrm{Dropout}(\mathrm{ReLU}(F_i(\mathbf{h}_{i-1})+\mathbf{h}_{i-1}))$ with $F_i$ the two dilated convolution--normalization stages, and the $A$ heads map the shared representation $\mathbf{h}_6$ to the per-appliance power $\mathbf{y}_a=\mathrm{Conv1d}_{32\rightarrow1}(\mathrm{Dropout}(\mathrm{ReLU}(\mathrm{Conv1d}_{128\rightarrow32}(\mathbf{h}_6))))$, giving the output $\mathbf{y}\in\mathbb{R}^{B\times T\times A}$. The shared trunk learns temporal features common to all appliances (cycles, transients, baseline variations) and the independent heads specialize in appliance-specific signatures. The exponential dilation schedule realizes a hierarchy of temporal scales: shallow blocks resolve start-up transients, deep blocks aggregate cycle-level context such as washing-machine program phases.
+Given an aggregate sequence $\mathbf{x}\in\mathbb{R}^{B\times1\times T}$ with $T=512$, the input projection, the residual blocks and the heads compute
+\begin{align*}
+\mathbf{h}_0&=\mathrm{Dropout}(\mathrm{ReLU}(\mathrm{BN}(\mathrm{Conv1d}_{1\rightarrow128}(\mathbf{x})))),\\
+\mathbf{h}_i&=\mathrm{Dropout}(\mathrm{ReLU}(F_i(\mathbf{h}_{i-1})+\mathbf{h}_{i-1})),\\
+\mathbf{y}_a&=\mathrm{Conv1d}_{32\rightarrow1}(\mathrm{Dropout}(\mathrm{ReLU}(\mathrm{Conv1d}_{128\rightarrow32}(\mathbf{h}_6)))),
+\end{align*}
+with $F_i$ the two dilated convolution--normalization stages, $A$ heads mapping the shared representation $\mathbf{h}_6$ to the per-appliance power $\mathbf{y}_a$, so that the output is $\mathbf{y}\in\mathbb{R}^{B\times T\times A}$. The shared trunk learns temporal features common to all appliances (cycles, transients, baseline variations) and the independent heads specialize in appliance-specific signatures. The exponential dilation schedule realizes a hierarchy of temporal scales: shallow blocks resolve start-up transients, deep blocks aggregate cycle-level context such as washing-machine program phases.
 
 \begin{figure*}[!t]
 \centering
@@ -752,7 +754,7 @@ The framework is evaluated on three public residential datasets. Table~\ref{tab:
 \caption{Experimental protocol. Each dataset has its own independently trained model; no cross-dataset training or fine-tuning is used in the main experiments. Windows have 512 steps (68.3 minutes at 8~s); all windows of a household belong to a single split.}
 \label{tab:protocol}
 \footnotesize
-\begin{tabular}{@{}p{1.9cm}p{2.6cm}p{2.7cm}p{1.8cm}p{2.6cm}p{2.3cm}p{2.3cm}@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}p{1.9cm}p{2.6cm}p{2.7cm}p{1.8cm}p{2.6cm}p{2.3cm}p{2.3cm}@{}}
 \toprule
 Dataset & Households & Split & Windows (train / val / test) & Sampling (raw $\rightarrow$ used) & Appliances & Aggregate signal \\
 \midrule
@@ -760,7 +762,7 @@ SustDataED2 & 1 household & chronological 70 / 15 / 15\% & 1,416 / 303 / 304 & 1
 REFIT & 20 households (H1--H13, H15--H21) & train H1--H13 and H15--H17 (16 houses), validation H18, test H19--H21 (unseen households) & 380,224 / 18,689 / 59,927 & 8~s & 9 & mains \\
 UK-DALE & House 1 & chronological 70 / 15 / 15\% & 11,610 / 2,488 / 2,488 & 6~s $\rightarrow$ 8~s & 12 & mains (site meter) \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table*}
 
 \paragraph{Preprocessing} The same pipeline is applied to all datasets. (i) \textit{Resampling:} every channel is resampled to a regular 8-second grid by averaging, and gaps shorter than one minute (up to 7 samples) are forward-filled. (ii) \textit{Missing values:} in SustDataED2 the remaining gaps are set to 0~W (appliance not drawing power); in UK-DALE windows with more than 10\% missing samples are discarded and the remainder zero-filled. (iii) \textit{Synchronization:} the SustDataED2 appliance files are logged by independent sensors, so timestamps are rounded to whole seconds before resampling (Section~\ref{subsubsec:SustDataED2_preprocessing}). (iv) \textit{Windowing:} 512-step windows, non-overlapping for SustDataED2 and UK-DALE and with a 256-step stride for REFIT; since splits are by household (REFIT) or chronological (SustDataED2, UK-DALE), overlapping windows never straddle two splits. SustDataED2 windows in which more than half of the aggregate samples are below 1~W are removed. (v) \textit{Normalization:} the aggregate is standardized with the mean and standard deviation of the training split; targets stay in Watts. (vi) \textit{Thresholds and activation filtering:} no activation filtering is applied to the training data; the 15~W ON/OFF threshold is used only to compute state metrics, and the optional post-processing threshold is selected on the validation split (Section~\ref{subsubsec:threshold_optimization}). (vii) \textit{Voltage systems:} only active power is used, so differences in mains voltage between datasets do not enter the model. The SustDataED2 aggregate is the sum of the twelve metered appliance channels (a closed-system setting without unmetered load), whereas REFIT and UK-DALE use the measured mains signal, which contains unmetered consumption; this difference is one reason for the lower error on SustDataED2.
@@ -920,7 +922,7 @@ To isolate the contribution of each design choice, ten variants were trained wit
 \caption{Ablation study (5 seeds, mean $\pm$ std). The architecture ladder (upper block) uses the MSE+MAE loss and changes one factor at a time; the loss ladder (lower block) uses the 6-block EDTCN. RF is the receptive field in steps ($\times$8~s). $\Delta$MAE is the paired difference to the deployed configuration (positive: worse than the deployed model) with an asterisk when the 95\% bootstrap interval over identical test windows excludes zero.}
 \label{tab:ablation}
 \footnotesize
-\begin{tabular}{@{}lc cccc cccc@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}lc cccc cccc@{}}
 \toprule
  & & \multicolumn{4}{c}{SustDataED2} & \multicolumn{4}{c}{UK-DALE} \\
 \cmidrule(lr){3-6}\cmidrule(lr){7-10}
@@ -938,7 +940,7 @@ EDTCN, focal ($\gamma=1$), no type weights & 259 & $5.33\pm0.33$ & $0.827\pm0.01
 EDTCN, type-weighted MSE & 259 & $5.05\pm0.27$ & $0.825\pm0.015$ & $0.179\pm0.029$ & -0.29$^{*}$ & $14.61\pm0.26$ & $0.553\pm0.006$ & $0.191\pm0.044$ & -0.40$^{*}$ \\
 \textbf{EDTCN, proposed loss (deployed)} & 259 & $5.34\pm0.10$ & $0.814\pm0.009$ & $0.213\pm0.019$ & ref. & $15.01\pm0.15$ & $0.549\pm0.006$ & $0.225\pm0.025$ & ref. \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table*}
 
 \begin{table}[!t]
@@ -983,7 +985,7 @@ The EDTCN is also the most computationally demanding of the compared networks (3
 \caption{Comparison with baselines re-implemented and trained under the identical protocol (same windows, splits, optimizer, epochs, seeds and checkpoint selection; baselines use the MSE+MAE loss). Mean $\pm$ std over seeds (SustDataED2 and UK-DALE: 5; REFIT: 2 for the baselines and the MSE+MAE EDTCN, 3 for the proposed EDTCN; REFIT uses the reduced protocol). Paired bootstrap tests on identical test windows give $p<0.001$ for every EDTCN-versus-baseline MAE difference. MMAC is millions of multiply--accumulate operations per 512-step window. Parameters and MMAC of all models are given for the 12-appliance configuration (SustDataED2 and UK-DALE); with the 9 REFIT heads the EDTCN has 706,889 parameters and 378~MMAC, Seq2Point-conv 98,849 and 50.0~MMAC, UNet-NILM 674,537 and 75.2~MMAC, and BERT4NILM-lite 365,321 and 84.8~MMAC.}
 \label{tab:baselines}
 \footnotesize
-\begin{tabular}{@{}lrr cc cc cc@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}lrr cc cc cc@{}}
 \toprule
  & & & \multicolumn{2}{c}{SustDataED2} & \multicolumn{2}{c}{REFIT} & \multicolumn{2}{c}{UK-DALE} \\
 \cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
@@ -999,7 +1001,7 @@ EDTCN (MSE+MAE loss) & 743{,}948 & 397 & $4.99\pm0.15$ & $0.830\pm0.010$ & $15.0
 \multicolumn{3}{l}{MAE reduction of EDTCN (proposed loss) vs best baseline} & \multicolumn{2}{c}{26\%} & \multicolumn{2}{c}{9\%} & \multicolumn{2}{c}{11\%} \\
 \multicolumn{3}{l}{MAE reduction of EDTCN (MSE+MAE) vs best baseline} & \multicolumn{2}{c}{31\%} & \multicolumn{2}{c}{12\%} & \multicolumn{2}{c}{16\%} \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table*}
 
 \subsubsection{Binary Classification Analysis}
@@ -1206,14 +1208,14 @@ Weights were quantized per output channel and activations per tensor with the sy
 \begin{equation}
 x_{int8} = \text{clip}(\text{round}(x_{fp32} / s), -128, 127)
 \end{equation}
-using the scale factors $s$ from the calibration table. The INT8 weights occupy 0.72--0.98~MB, 3.9$\times$ less than FP32 (Table~\ref{tab:quantization_results}). Table~\ref{tab:int8_pc} evaluates the true INT8 models on the complete test splits on a PC. For the regression models the accuracy is essentially preserved: with ACIQ clipping the MAE changes by -0.8\%, +2.5\% and -0.0\% on REFIT, SustDataED2 and UK-DALE, and the F1 stays within 0.01 of the FP32 value. The choice of the calibration matters: KL clipping is equally good on REFIT (+0.7\%) but raises the SustDataED2 MAE by 33\%, which ACIQ clipping avoids (+2.5\%). Keeping the input projection (and, where the validation split favors it, the output convolutions) in FP32 --- a choice made on the validation split only --- keeps every regression model at or below +0.4\% of the FP32 MAE (REFIT: 2.0\% below) while the weights stay at or below 0.90~MB. State detection with the classification networks is more sensitive to quantization: with all convolutions in INT8 the macro-F1 changes by -0.128 and -0.182 (KL clipping, SustDataED2 and UK-DALE), whereas the mixed-precision models are within 0.035 of the FP32 value (0.373 versus 0.408 on SustDataED2 and 0.497 versus 0.503 on UK-DALE). On the PC one window is processed 2.4--2.7 times faster in INT8 than in FP32 (single thread); because the ARM926EJ-S has no SIMD unit, the speed-up on the F1C200s has to be measured on the board. The execution time, memory and power on the F1C200s are reported below.
+using the scale factors $s$ from the calibration table. The INT8 weights occupy 0.72--0.98~MB, 3.9$\times$ less than FP32 (Table~\ref{tab:quantization_results}). Table~\ref{tab:int8_pc} evaluates the true INT8 models on the complete test splits on a PC. For the regression models the accuracy is essentially preserved: with ACIQ clipping the MAE changes by -0.8\%, +2.5\% and -0.0\% on REFIT, SustDataED2 and UK-DALE, and the F1 stays within 0.01 of the FP32 value. The choice of the calibration matters: KL clipping is equally good on REFIT (+0.7\%) but raises the SustDataED2 MAE by 33\%, which ACIQ clipping avoids (+2.5\%). Keeping the input projection (and, where the validation split favors it, the output convolutions) in FP32 --- a choice made on the validation split only --- keeps every regression model at or below +0.4\% of the FP32 MAE (REFIT: 2.0\% below) while the weights stay at or below 0.90~MB. State detection with the classification networks is more sensitive to quantization: with all convolutions in INT8 the macro-F1 changes by -0.128 and -0.182 (KL clipping, SustDataED2 and UK-DALE), whereas the mixed-precision models are within 0.035 of the FP32 value (0.373 versus 0.408 on SustDataED2 and 0.497 versus 0.503 on UK-DALE). On the PC, one window takes 6.5--8.3~ms in INT8 and 6.6--9.0~ms in FP32 (single thread), i.e.\ INT8 brings no speed-up on the PC, and none is claimed. The effect of INT8 on the speed of the F1C200s, which has no SIMD unit, was not isolated. The execution time, memory and power on the F1C200s are reported below.
 
 \begin{table*}[!t]
 \centering
 \caption{FP32 versus true INT8 (NCNN) models evaluated on the complete test splits on a PC (x86, NCNN). Cells show MAE (W) / F1 for regression models (pooled F1 at 15~W, as in Table~\ref{tab:overall_performance}) and macro-averaged F1 for classification models (probability $>0.5$). INT8 KL and INT8 ACIQ quantize every convolution with the respective clipping calibration (500 validation windows); INT8 mixed keeps the input projection and, for some models, the output convolutions in FP32, selected on the validation split only. Percentages are MAE changes with respect to FP32. Sizes: FP32 weights / INT8 / INT8 mixed. Latency: one window, one thread, FP32 / INT8 (PC, not the F1C200s), median of seven interleaved rounds of 60 runs in one session (INT8 ACIQ shown). INT8 is not faster than FP32 on this x86 CPU; an INT8 speed-up is therefore not claimed for the PC, and the speed on the F1C200s was not re-measured with these models.}
 \label{tab:int8_pc}
 \footnotesize
-\begin{tabular}{@{}llrccccrc@{}}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{@{}llrccccrc@{}}
 \toprule
 Dataset & Model & Windows & FP32 & INT8 KL & INT8 ACIQ & INT8 mixed & Size (MB) & Latency (ms) \\
 \midrule
@@ -1223,7 +1225,7 @@ UK-DALE & Reg. & 2,488 & 17.30 / 0.531 & 17.89 / 0.516 (+3.4\%) & 17.30 / 0.528 
 SustDataED2 & Cls. & 304 & -- / 0.408 & -- / 0.280 & -- / 0.383 & -- / 0.373 & 3.85 / 0.98 / 1.35 & 9.0 / 8.3 \\
 UK-DALE & Cls. & 2,488 & -- / 0.503 & -- / 0.321 & -- / 0.454 & -- / 0.497 & 3.85 / 0.98 / 0.98 & 8.9 / 8.2 \\
 \bottomrule
-\end{tabular}
+\end{tabular}\end{adjustbox}
 \end{table*}
 
 \begin{table}[!t]
