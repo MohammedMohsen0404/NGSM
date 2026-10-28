@@ -1473,26 +1473,7 @@ The NILM evaluation has the following limits. The SustDataED2 aggregate is the s
 
 The hardware is an uncertified proof-of-concept prototype. Power was read with a multimeter and is reported at board level; no formal thermal measurements, environmental tests, surge tests (IEC 61000-4-5) or certification under IEC 62052-11 and IEC 62053-21 were performed, and creepage and clearance distances were not verified. The harmonic measurement was verified on synthetic signals and cross-checked, but not against a certified power-quality analyzer. The concurrent operation of metrology, display, tamper detection and communication during an inference run has not been measured, and the results of the 24-h soak test are limited to a single run of that duration.
 
-The measurements that are still missing are defined as a validation plan in Table~\ref{tab:validation_plan}; each test states what is measured, how, and the reference or criterion that decides whether the prototype passes. The criteria of the first four tests are proposed targets of the authors, not requirements of a standard.
-
-\begin{table*}[!t]
-\centering
-\caption{Validation plan for the measurements that were not carried out on the prototype.}
-\label{tab:validation_plan}
-\footnotesize
-\begin{tabular}{@{}p{3.1cm}p{4.0cm}p{4.6cm}p{4.6cm}@{}}
-\toprule
-Test & Quantity measured & Method & Reference or criterion \\
-\midrule
-Concurrent operation & Cycle time and CPU share of metrology, harmonic analysis, display, tamper detection and communication while an inference runs & Log the task periods over 24~h with and without inference on the complete meter & No missed metrology samples and unchanged task periods during inference \\
-Thermal behavior & SoC package temperature during sustained inference & External thermocouple on the package, repeated inference runs in the closed enclosure at room temperature & Below the maximum operating temperature in the SoC datasheet, with no throttling of the inference time \\
-Long-duration stability & Resident memory, inference time and file-system errors & Log at every reporting interval for at least 7~days & No monotonic growth of memory, no change of the inference time beyond the 0.03~s spread already observed, no file-system errors \\
-Power budget & Current of each subsystem and efficiency of the AC/DC converter & In-line current measurement at each supply rail and a power analyzer at the mains input, in the idle, buffering and inference states & Subsystem breakdown that sums to the measured total; efficiency as DC output over AC input \\
-Equal-workload comparison & Energy per inference of the same INT8 model on the three platforms & Run the same NCNN model and window on the Raspberry Pi 4, the Raspberry Pi Zero 2W and the F1C200s with the same peripherals connected & Energy per inference and inferences per watt-hour under one workload \\
-Harmonic reference & THD and individual harmonics of voltage and current against a calibrated power-quality analyzer & Simultaneous measurement of the same loads, including the 47~W non-linear load & IEC 61000-4-7 Class I: $\pm5\%$ of the reading for components above 1\% (voltage) or 3\% (current) of the nominal value \\
-\bottomrule
-\end{tabular}
-\end{table*}
+The scope of this work is the feasibility of NILM inference on a low-cost, low-power SoC, not a complete metrological and environmental characterization of the meter. Thermal behavior during sustained inference, multi-day stability, the timing of the real-time tasks while an inference runs, a per-subsystem power breakdown, an equal-workload energy comparison with other platforms, and a comparison of the harmonic indices with a calibrated power-quality analyzer require instrumentation that was not available for this study. They are not claimed here and are planned for the pilot deployments; the conclusions of this paper are limited to the benchtop measurements reported above.
 
 \textbf{Cybersecurity Limitations and Future Work.} The prototype uses JWT-based authentication for protected web routes and API-backed consumption data, TLS, and physical enclosure-tampering detection; these measures are not a complete cybersecurity assurance framework, and the embedded Linux platform and cloud-connected architecture remain exposed to unauthorized access, compromised credentials, malicious firmware and network-level attacks. Future work includes penetration testing of the firmware, communication interfaces, backend APIs and applications; cryptographic signature verification of firmware updates; device identities with mutual authentication; secure boot and a verified update chain, subject to bootloader support on the F1C200s; and centralized security-event monitoring and alerting. These measures will be evaluated through security testing and resource-overhead measurements before being claimed as implemented.
 
