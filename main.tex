@@ -14,6 +14,7 @@
 \usepackage{cite}
 \usepackage{adjustbox}
 \usepackage{tabularx}
+\usepackage{float}
 
 \begin{document}
 
@@ -981,42 +982,42 @@ Correspondence and requests for materials should be addressed to N.M.M.
 This section collects additional hardware and software figures, supplementary NILM tables and figures (per-appliance results, layer and receptive-field derivations, post-processing, robustness and adaptation, operator fusion and the ARM build), the forecast outage analysis, the failure-mode and privacy-threat tables, and the detailed test designs, configurations and budgets that support the harmonic and forecasting results.
 \subsection*{Additional hardware figures}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.90\textwidth]{figures/img3.png}
     \caption{First Generation NGSM Hardware Components illustrating the interface between the Raspberry Pi 3 and discrete analog sensors.}
     \label{fig:gen1_block}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.90\textwidth]{figures/img7.png}
     \caption{Second Generation NGSM Hardware Components illustrating the integration of the Raspberry Pi Zero 2W with the STPM33 and TFT Display.}
     \label{fig:gen2_hardware}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.50\textwidth]{figures/img8.png}
     \caption{Board connection diagram showing the dual-phase system interface and phantom load configuration.}
     \label{fig:gen2_connection}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.48\textwidth]{figures/img9.png}
     \caption{TFT Display output: Measuring without input (Idle state).}
     \label{fig:gen2_idle}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.50\textwidth]{figures/img10.png}
     \caption{TFT Display output: Measuring active load.}
     \label{fig:gen2_load}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.48\textwidth]{figures/2ndgen.jpg}
     \caption{Final Second Generation hardware configuration showing the Raspberry Pi Zero 2W connected to the TFT display.}
@@ -1024,14 +1025,14 @@ This section collects additional hardware and software figures, supplementary NI
 \end{figure}
 
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/gen3_pcb_schematic.jpg}
     \caption{Schematic of the third-generation carrier PCB: F1C200s (MangoPi) connections, STPM33 and TFT connectors, switches and indicator LED, and the Hi-Link AC/DC converter.}
     \label{fig:gen3_pcb_schematic}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.60\textwidth]{figures/gen3_pcb_3d.png}
     \caption{3D model of the third-generation custom PCB with the MangoPi board soldered onto it.}
@@ -1040,42 +1041,42 @@ This section collects additional hardware and software figures, supplementary NI
 
 \subsection*{Software and user-interface figures}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.90\textwidth]{figures/img13.png}
     \caption{Detailed NGSM Web-Based System Architecture showing the API interaction between the Meter Firmware, Cloud Backend, and Client Applications.}
     \label{fig:web_arch}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/img14.png}
     \caption{User Interaction Flow Diagram illustrating the navigation paths between public pages, authentication layers, and private dashboard modules.}
     \label{fig:user_flow}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/img16.png}
     \caption{Energy Consumption Dashboard providing visualization of historical usage and cost metrics.}
     \label{fig:consumption_page}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.50\textwidth]{figures/img18.png}
     \caption{Activity Diagram illustrating the operational flow of the NGSM Mobile Application.}
     \label{fig:mobile_activity}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.50\textwidth]{figures/img21.png}
     \caption{Energy Consumption (kWh) View.}
     \label{fig:mobile_kwh}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.50\textwidth]{figures/img22.png}
     \caption{Calculated Cost View.}
@@ -1085,7 +1086,7 @@ This section collects additional hardware and software figures, supplementary NI
 
 \subsection*{Additional NILM results}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Receptive-field derivation of the EDTCN ($K=3$, two convolutions per block, input projection of kernel 7). Time spans assume the 8~s sampling interval used for all datasets.}
 \label{tab:rf}
@@ -1105,7 +1106,7 @@ TCN block 6 & 32 & 128 & \textbf{259} & \textbf{34.5} \\
 \end{tabular}
 \end{table}
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Layer-by-layer description of the EDTCN (REFIT configuration, 9 appliances, batch dimension omitted). MACs are counted per 512-step window; $A$ is the number of appliances.}
 \label{tab:layers}
@@ -1127,9 +1128,9 @@ Output heads ($A$ in parallel) & Conv1d$_{128\rightarrow32}$, ReLU, Dropout(0.2)
 Total ($A=9$) & & $512\times9$ & & & 706,889 & 377.8 \\
 \bottomrule
 \end{tabular}\end{adjustbox}
-\end{table*}
+\end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Per-appliance results of the deployed SustDataED2 model on the test split (304 windows). ON (\%) is the fraction of test time the appliance is above 15~W; SAE and NDE are undefined (--) for appliances that are never ON in the test split. Device types: A always-on/cycling, B regular-use, C burst. The precision, recall and F1 of the Fridge-Freezer and the Kettle agree to two decimals by coincidence (unrounded: 0.8818/0.9952/0.9350 and 0.8819/0.9957/0.9354); the Kettle is ON in only 0.7\% of the test time.}
 \label{tab:SustDataED2_per_appliance}
@@ -1154,7 +1155,7 @@ VacuumCleaner & C & 0.1 & 1.54 & 24.4 & 0.98 & 0.050 & 0.026 & 0.701 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Per-appliance results of the deployed REFIT model on the unseen test houses 19--21 (59,927 windows). Device types follow the dataset package: A always-on/cycling, B regular-use, C burst.}
 \label{tab:refit_per_appliance}
@@ -1176,7 +1177,7 @@ Microwave & C & 0.2 & 5.07 & 11.9 & 0.95 & 0.108 & 0.058 & 0.763 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Per-appliance results of the deployed UK-DALE model on the House 1 test split (2,488 windows). The 12-appliance configuration includes networking equipment and lighting, going beyond common NILM benchmarks.}
 \label{tab:ukdale_per_appliance}
@@ -1201,14 +1202,14 @@ Toaster & C & 0.5 & 13.20 & 47.9 & 0.78 & 0.224 & 0.128 & 0.896 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.60\textwidth]{figures/SustDataED2_per_appliance_mae.png}
 \caption{Per-appliance MAE of the deployed model on the SustDataED2 test set, for the appliances that are ON at least once in the test split (bars colored by the F1 at 15~W, which is also printed under each appliance). Fridge-Freezer, Freezer and Kettle are detected reliably; low-power and rarely active appliances remain challenging.}
 \label{fig:SustDataED2_results}
 \end{figure}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Binary classification evolution on REFIT through systematic loss function optimization. Weighted BCE addresses class imbalance (+41\% F1), while excluding the kettle and the tumble dryer, for which no usable classifier could be trained, prevents numerical instability.}
 \label{tab:classification_evolution}
@@ -1227,14 +1228,14 @@ Iteration & Loss Function & Appliances & F1 & Prec. & Recall & Key Improvement \
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.60\textwidth]{figures/training_speedup.png}
 \caption{Training efficiency improvements through GPU optimization. Sequential optimizations (pre-converted tensors, cuDNN auto-tuning, reduced logging) achieve cumulative $6.4\times$ speedup, reducing epoch time from 16 min to 2.5 min. GPU utilization increases from 5-10\% (memory-bound baseline) to 40-50\% (compute-bound optimized), enabling practical hyperparameter search on 380K-sample datasets.}
 \label{fig:training_speedup}
 \end{figure}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Post-processing threshold $\tau$ (predictions below $\tau$ are set to OFF; the ground-truth ON threshold stays at 15~W). F1 on the validation and test splits of each dataset; the value selected on the validation split is in bold. The threshold is never tuned on test data.}
 \label{tab:threshold_sweep}
@@ -1256,7 +1257,7 @@ $\tau$ (W) & val F1 & test F1 & val F1 & test F1 & val F1 & test F1 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Per-house results on the REFIT houses that were never used for training (appliances present in each house only). House 18 is the validation house; houses 19--21 form the test split.}
 \label{tab:unseen_houses}
@@ -1275,7 +1276,7 @@ House & Appl. & MAE (W) & F1 & SAE & MAE (W) & F1 & SAE \\
 \end{tabular}
 \end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Leave-one-house-out (LOHO) on REFIT. Each held-out training house is evaluated by a model that never saw it (trained 8 epochs on the other houses) and by the reference model trained on all 16 training houses (25 epochs); only appliances present in the house are scored. The gap includes the difference in training length and is therefore an upper bound of the cost of an unseen house.}
 \label{tab:loho}
@@ -1297,7 +1298,7 @@ Mean & & 25.2 & 0.57 & 26.2 & 0.55 & +1.0 & -0.02 \\
 \end{tabular}
 \end{table}
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Zero-shot transfer and adaptation on the five appliances shared by REFIT and UK-DALE (fridge, washing machine, dishwasher, microwave, kettle; present appliances only). Cells show MAE (W) / F1 on the held-out evaluation block (mean of two seeds). $k$ is the number of days of target data used for adaptation. The last two columns give the change of the MAE on the source dataset (forgetting) after full fine-tuning and after fine-tuning with EWC; the trunk-frozen head adaptation changes it by at most 2.7~W.}
 \label{tab:transfer}
@@ -1331,9 +1332,9 @@ adapted & 3 & -- & 42.3 / 0.38 & 31.9 / 0.48 & 32.0 / 0.47 & 28.2 / 0.49 & +3.6 
 adapted & 7 & -- & 42.9 / 0.46 & 29.5 / 0.50 & 30.5 / 0.52 & 26.1 / 0.50 & +6.8 & +7.0 \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Operator-fusion ablation of the regression models (same weights; REFIT on 3{,}000 evenly spaced test windows, the other datasets on the complete test split). Layers: unfused / BN folded / deployed. INT8 results use ACIQ calibration of all convolutions with the same 500 calibration windows. Latency: one window, one thread, PC, range over the three forms (FP32 / INT8), measured in the same way as in Table~\ref{tab:int8_pc}.}
 \label{tab:fusion}
@@ -1351,7 +1352,7 @@ UK-DALE & 98 / 85 / 66 & 17.30 / 0.528 & 0.78 / 0.76 & 7.6--7.9 / 7.0--7.3 \\
 
 To separate the effect of compiler fusion from that of quantization, each regression network was built in three NCNN forms with identical weights (Table~\ref{tab:fusion}): \textit{unfused} (Convolution, BatchNorm and ReLU as separate layers), \textit{BN folded}, and the \textit{deployed} graph in which the ReLU is also merged into the convolution. The unfused graphs were generated directly from the PyTorch weights because PNNX cannot export them; all three forms reproduce the PyTorch output within $4\times10^{-4}$~W, and \texttt{ncnnoptimize} turns the unfused graph into the same 66-layer deployed graph. Fusion removes one third of the layers (98 to 66 for the 12-appliance models) and 0.9\% of the weight file, and it does not change the accuracy: FP32 and INT8 MAE and F1 are identical to the third decimal in all forms. The PC latency is 6.6--7.9~ms for every form, within the measurement repeatability ($\pm$0.4~ms), so no latency benefit could be shown, and the effect on the F1C200s was not measured. Fusion is thus a lossless graph optimization, and the accuracy changes in this section are caused by quantization alone.
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Agreement between the soft-float ARM926EJ-S build and the PC build of the rebuilt INT8 models (50 evenly spaced test windows per model; same NCNN model files). Each cell gives the largest absolute difference / the mean absolute difference of the outputs / the percentage of identical ON/OFF decisions. The ARM build was executed on a PC with an ARM926EJ-S CPU model, not on the F1C200s board.}
 \label{tab:arm_build}
@@ -1373,7 +1374,7 @@ UK-DALE & Cls. (prob.) & $0.015$ / $1.2\times10^{-5}$ / 99.998 & $0.021$ / $5.2\
 The NCNN engine was also cross-compiled for the ARM926EJ-S without NEON and with software floating point (\texttt{-mcpu=arm926ej-s -mfloat-abi=soft}, statically linked), so the remaining floating-point operations use soft-float routines (Stage 4). Executed on a PC with an ARM926EJ-S CPU model (not on the F1C200s board) on 50 evenly spaced test windows per model, it reproduces the outputs of the PC build (Table~\ref{tab:arm_build}): the mean absolute difference is below $5\times10^{-4}$ (W or probability), the ON/OFF decisions agree in at least 99.996\% of the output samples, and the largest single difference is 1.2~W (isolated one-step INT8 rounding differences; the outputs are not bit-identical). These runs establish functional agreement only; no timing, power or temperature is derived from them.
 
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Latency budget of the NILM service on the F1C200s (REFIT regression model, 512-step window). ``Derived'' entries follow from the window definition or from operation counts; ``measured'' entries are from the timing runs of Table~\ref{tab:hardware_inference_results}.}
 \label{tab:latency}
@@ -1397,7 +1398,7 @@ CPU duty at 15-minute cadence & 11--14\% & derived: inference time / 900~s \\
 
 \subsection*{Harmonic verification and forecasting benchmark}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Verification of the THD estimators on synthetic signals.}
 \label{tab:thd_verification}
@@ -1412,14 +1413,14 @@ Notch filter (THD+N) & 3.20 & 0.83 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/thd_method_verification.png}
     \caption{Worst-case THD error of the estimators versus fundamental frequency.}
     \label{fig:thd_verification}
 \end{figure}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Data splits of the forecasting benchmark.}
 \label{tab:forecast_protocol}
@@ -1434,7 +1435,7 @@ Test & Apr 2016 -- Mar 2017 & 35{,}040 & 98.9 & 396 & 351 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/forecast_mae_vs_horizon.png}
     \caption{Forecast MAE versus horizon on the test year.}
@@ -1443,7 +1444,7 @@ Test & Apr 2016 -- Mar 2017 & 35{,}040 & 98.9 & 396 & 351 \\
 
 \subsection*{Forecast outage analysis and failure modes}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Forecast MAE (W) of the 1-h-ahead forecast during cloud outages, averaged over the outage. The cached forecast covers 24~h at most, so it is not defined for the 3-day outage (--); the hybrid strategy switches to the on-meter ARIMA(1,1,0) forecast when the cached forecast no longer covers the target.}
 \label{tab:forecast_outage}
@@ -1460,14 +1461,14 @@ Outage & Cached cloud forecast & On-meter ARIMA(1,1,0) & Hybrid \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/forecast_cloud_outage.png}
     \caption{Forecast MAE versus elapsed outage time.}
     \label{fig:forecast_outage}
 \end{figure}
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Failure modes, effect, detection, recovery and status of the prototype.}
 \label{tab:failures}
@@ -1485,7 +1486,7 @@ Backend outage & As above & As above & Only local buffering; no further recovery
 Incorrect NILM prediction & Wrong appliance information shown to the user & Like/dislike feedback in the application, logged for future model improvement (no confidence estimate) & None automatic & Feedback implemented; confidence flag planned \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 
 
@@ -1494,7 +1495,7 @@ Incorrect NILM prediction & Wrong appliance information shown to the user & Like
 
 \textit{Privacy.} Raw high-frequency voltage and current are processed on the meter and are not uploaded during normal NILM operation; the head-end system receives appliance classifications, estimated appliance power or energy, event timestamps, aggregated consumption and the identifier needed to associate them with an account, and the forecasting service uses only aggregated 15-min values. This reduces the exposure of raw measurements but does not prevent inference of occupancy and routines from appliance-level events, so NGSM is a privacy-risk-reduction architecture, not a guarantee of anonymity. Table~\ref{tab:privacy_threats} summarizes the main threats. Federated learning limits the centralization of training data but adds communication, synchronization and local-training costs on a 64~MB meter without FPU, and its updates can leak information; homomorphic encryption and secure aggregation protect specific computations at the cost of computation, message size and key management that would have to be measured on the target hardware. None of these approaches prevents inference from legitimately shared outputs; combining local inference with secure aggregation for future multi-meter learning is a possible direction.
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Main privacy threats, mitigation and residual risk.}
 \label{tab:privacy_threats}
@@ -1524,7 +1525,7 @@ The estimator was verified on synthetic voltage and current signals with known h
 
 In addition to the synthetic verification, the prototype measurement was cross-checked in three ways that do not depend on the FFT implementation (Table~\ref{tab:thd_consistency}). First, an independent estimator that fits sine and cosine terms at $h f_1$ ($h = 1, \dots, 40$) directly to the raw samples of each window by least squares, in the manner of IEEE Std 1057 \cite{ieee1057}, agrees with the subgroup result within 0.003~pp for $THD_V$ and 0.37~pp for $THD_I$. Second, the active power computed in the time domain (46.71~W) equals the sum of the per-harmonic active powers $\sum_h V_h I_h \cos\varphi_h$ within 0.02\%, which checks the amplitudes and the relative phases of both channels. Third, the in-band current noise (13.0~mA) is 25 times larger than the quantization noise of the converter (0.53~mA), so it originates in the analog front end rather than in the digitization. At this light load the noise amounts to 5.8\% of the fundamental current and, together with the fluctuating operation of the load, causes the window-to-window variation of $THD_I$ (standard deviation 1.6~pp over 200-ms windows).
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Consistency checks of the prototype measurement.}
 \label{tab:thd_consistency}
@@ -1549,7 +1550,7 @@ Quantization noise (step$/\sqrt{12}$) & 0.53~mA \\
 
 The uncertainty of the reported THD values was evaluated following the Guide to the Expression of Uncertainty in Measurement (GUM) \cite{jcgm100} with Monte Carlo propagation \cite{jcgm101} (Table~\ref{tab:thd_uncertainty}). The budget combines the window-to-window repeatability (Type A); the frequency response of the current transformer, bounded by 1\% up to 1.5~kHz and 3\% at 2.5~kHz according to an independent test of split-core metering current transformers \cite{oem_ct_report}; the frequency response of the voltage sensor, whose behaviour above 60~Hz is not specified in its datasheet and for which a bound of $\pm$2\% up to 2~kHz is assumed; the measured noise floor; and the estimator error obtained from the synthetic verification for the measured spectra. The result is $THD_V = 2.15 \pm 0.03\%$ and $THD_I = 35.02 \pm 0.84\%$ (expanded uncertainty, $k = 2$). Repeatability dominates the current uncertainty, which reflects the load and the light-load noise rather than the estimator.
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Uncertainty budget of the THD measurement. The combined values come from the Monte Carlo propagation, not from the quadrature sum of the rows.}
 \label{tab:thd_uncertainty}
@@ -1573,7 +1574,7 @@ Result ($k = 2$) & $2.15 \pm 0.03\%$ & $35.02 \pm 0.84\%$ \\
 
 Four reference forecasts that require little or no training serve as baselines: persistence (the last observed value), seasonal naive forecasts that repeat the value of the same interval one day or one week earlier, and the Auto-Regressive Integrated Moving Average model ARIMA(1,1,0) of the original NGSM design, fitted on the training years. Three learned models are compared with them. The first consists of gradient-boosted regression trees (GBM) with histogram-based boosting \cite{Ke2017lightgbm, Pedregosa2011sklearn}, with one model per reported horizon; its features are the most recent values and the 1-h and 24-h means, the values of the target interval one, two and seven days earlier, and calendar features of the target interval (time of day, day of week, weekend flag and month). The second is the stacked Long Short-Term Memory (LSTM) network of the NGSM design, with hidden sizes 64, 32 and 16, batch normalization and dropout 0.2, which takes the last two days (192 intervals) of power and calendar features as input and predicts all 96 horizons at once; its output layer additionally receives the values of the same 96 intervals one day and one week earlier. The third is a Temporal Fusion Transformer (TFT) \cite{Lim2021tft}, implemented with Darts \cite{Herzen2022darts}, with hidden size 64, one LSTM layer, four attention heads and dropout 0.3, which uses the same two-day input and 96-step output as the LSTM and receives the calendar features as known future inputs. The LSTM and TFT are trained with the mean squared error on min--max scaled data, excluding unscored intervals from the loss, with early stopping on the validation year and restoration of the best epoch. Each learned model is trained with five random seeds. Table~\ref{tab:forecast_repro} lists the complete configuration.
 
-\begin{table*}[!t]
+\begin{table}[H]
 \centering
 \caption{Configuration of the forecasting models.}
 \label{tab:forecast_repro}
@@ -1589,11 +1590,11 @@ LSTM & LSTM layers 64--32--16 with batch normalization and dropout 0.2; dense ou
 TFT & Darts TFTModel: hidden size 64, 1 LSTM layer, 4 attention heads, dropout 0.3; input 192, output 96 intervals; known future covariates: time of day, day of week and month (sine/cosine); mean squared error loss; Adam, learning rate $10^{-3}$, batch 256, at most 40 epochs, early stopping patience 5, best epoch restored; 5 seeds. \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 \subsection*{Forecasting models: computational cost}
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Computational cost of the forecasting models.}
 \label{tab:forecast_compute}
@@ -1614,7 +1615,7 @@ TFT & 230{,}061 & 899~kB & 73.6~ms (96 horizons) & 12{,}229 & $\approx$45~min \\
 \subsection*{Reproducibility Details of the NILM Experiments}
 Table~\ref{tab:repro} lists the software versions, the window counts of the chronological splits (one window is 512 samples at 8~s) and the checksums of the six deployed checkpoints, so that the reported results can be traced to the exact files used. Training seeds (2026--2030), the optimizer settings, the 500-window calibration sets, the 15~W state threshold and the bootstrap settings are given in the main text. The hardware used for training was an NVIDIA RTX 3050 6~GB laptop GPU, and the INT8 evaluation on the PC used the NCNN CPU back end with one thread per process.
 
-\begin{table}[!t]
+\begin{table}[H]
 \centering
 \caption{Software versions, split sizes and checksums of the deployed checkpoints.}
 \label{tab:repro}
