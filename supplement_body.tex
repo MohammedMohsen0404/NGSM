@@ -158,7 +158,7 @@ Total ($A=9$) & & $512\times9$ & & & 706,889 & 377.8 \\
 
 \begin{table}[H]
 \centering
-\caption{Per-appliance results of the deployed SustDataED2 model on the test split (304 windows). ON (\%) is the fraction of test time the appliance is above 15~W; SAE and NDE are undefined (--) for appliances that are never ON in the test split. Device types: A always-on/cycling, B regular-use, C burst. The precision, recall and F1 of the Fridge-Freezer and the Kettle agree to two decimals by coincidence (unrounded: 0.8818/0.9952/0.9350 and 0.8819/0.9957/0.9354); the Kettle is ON in only 0.7\% of the test time.}
+\caption{Per-appliance results of the deployed SustDataED2 model on the test split (304 windows). ON (\%) is the fraction of test time the appliance is above 15~W; SAE and NDE are undefined (--) for appliances that are never ON in the test split. TV-Philips, TV-Sharp and the two MacBooks were not recorded during the test period (Table~\ref{tab:sust_coverage}), so their zero ON time reflects missing recordings. Device types: A always-on/cycling, B regular-use, C burst. The precision, recall and F1 of the Fridge-Freezer and the Kettle agree to two decimals by coincidence (unrounded: 0.8818/0.9952/0.9350 and 0.8819/0.9957/0.9354); the Kettle is ON in only 0.7\% of the test time.}
 \label{tab:SustDataED2_per_appliance}
 \footnotesize
 \begin{tabular}{@{}lcccccccc@{}}
@@ -545,7 +545,7 @@ Compromised meter, insider misuse, long retention & Firmware hardening, authenti
 
 \subsection*{Verification of the harmonic estimator on synthetic signals}
 
-The estimator was verified on synthetic voltage and current signals with known harmonic content, generated at the 44~kHz rate of the prototype capture described below (3-s records). Seven harmonic profiles were used, from a low-distortion profile (6.2\% THD) to an SMPS-like profile (110\% THD), including profiles matching the measured current and voltage spectra. The signals had random harmonic phases, fundamental frequencies from 49 to 51~Hz, a frequency drift of 0.5~Hz within the record, a 1\% interharmonic at 175~Hz, and band-limited noise at the level measured on the prototype. The results are reported in the main text (Table~\ref{tab:thd_verification} and Figure~\ref{fig:thd_verification}).
+The estimator was verified on synthetic voltage and current signals with known harmonic content, generated at the 44~kHz rate of the prototype capture described below (3-s records). Seven harmonic profiles were used, from a low-distortion profile (6.2\% THD) to an SMPS-like profile (110\% THD), including profiles matching the measured current and voltage spectra. The signals had random harmonic phases, fundamental frequencies from 49 to 51~Hz, a frequency drift of 0.5~Hz within the record, a 1\% interharmonic at 175~Hz, and band-limited noise at the level measured on the prototype. The results are given in Table~\ref{tab:thd_verification} and Figure~\ref{fig:thd_verification}; the main text summarizes them.
 
 \subsection*{Cross-checks of the prototype measurement}
 
@@ -664,6 +664,223 @@ UK-DALE, regression & 6c743e9c7c331a78 \\
 REFIT, classification & b5408c030b2b4508 \\
 SustDataED2, classification & 1ac6a0a9d5136d90 \\
 UK-DALE, classification & 4a8d8dfc9bf5f326 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Additional analyses for the second revision}
+
+\begin{table}[H]
+\centering
+\caption{Recording coverage of the 12 SustDataED2 appliance channels used in the experiments: recording period of each channel and share (\%) of each chronological split in which the channel contains data. Outside its recording period a channel is set to 0~W. The common range of the campaign is 5~October 2016 to 9~January 2017; the splits end on about 12~December and 26~December.}
+\label{tab:sust_coverage}
+\footnotesize
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Appliance & Recorded from & Recorded to & Train & Val & Test \\
+\midrule
+TV-Philips & 2016-10-23 & 2016-11-26 & 50 & 0 & 0 \\
+Fridge-Freezer & 2016-10-05 & 2017-01-09 & 100 & 100 & 100 \\
+Freezer & 2016-10-05 & 2017-01-09 & 99 & 100 & 100 \\
+TV-Samsung & 2016-11-26 & 2017-01-09 & 23 & 100 & 100 \\
+TV-Sharp & 2016-10-05 & 2016-10-30 & 36 & 0 & 0 \\
+MacBookPro2011-1 & 2016-10-05 & 2016-11-30 & 70 & 0 & 0 \\
+MacBookPro2011-2 & 2016-10-05 & 2016-11-25 & 74 & 0 & 0 \\
+Microwave & 2016-10-05 & 2017-01-09 & 100 & 100 & 100 \\
+Kettle & 2016-10-05 & 2017-01-09 & 100 & 100 & 100 \\
+VaccumCleaner & 2016-10-05 & 2017-02-09 & 100 & 100 & 100 \\
+HairDryer-Straightener & 2016-10-05 & 2017-01-09 & 99 & 100 & 98 \\
+CoffeeMachine & 2016-10-05 & 2017-01-09 & 100 & 100 & 100 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Zero-valued aggregate samples (0~W, recording outages filled with zeros by the data packages or, for SustDataED2, aggregate of unrecorded channels) per dataset and split. The last two columns give the share of windows with at least 10\% and with all samples at zero.}
+\label{tab:gap_stats}
+\footnotesize
+\begin{tabular}{@{}llrccc@{}}
+\toprule
+Dataset & Split & Windows & Zero samples (\%) & Windows $\geq$10\% zero (\%) & All-zero windows (\%) \\
+\midrule
+UK-DALE & train & 11{,}610 & 11.00 & 10.0 & 7.6 \\
+UK-DALE & val & 2{,}488 & 2.71 & 0.6 & 0.3 \\
+UK-DALE & test & 2{,}488 & 2.94 & 1.4 & 0.0 \\
+SustDataED2 & train & 1{,}416 & 0.09 & 0.2 & 0.0 \\
+SustDataED2 & val & 303 & 0.00 & 0.0 & 0.0 \\
+SustDataED2 & test & 304 & 0.06 & 0.0 & 0.0 \\
+REFIT & train (1 in 20 windows) & 19{,}012 & 25.3 & 51.1 & 12.0 \\
+REFIT & val & 18{,}689 & 21.4 & 50.3 & 5.9 \\
+REFIT & test & 59{,}927 & 20.7 & 47.6 & 6.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Test performance of the proposed model on all windows and on windows with and without zero-valued aggregate stretches (UK-DALE: five retrained models, mean $\pm$ std; REFIT: deployed checkpoint, unseen houses 19--21). MAE is the macro average over appliances, F1, precision and recall are pooled at 15~W. The all-zero windows (6.8\% of the REFIT test windows) are predicted without errors.}
+\label{tab:gap_eval}
+\footnotesize
+\begin{tabular}{@{}llrcccc@{}}
+\toprule
+Model & Subset & Windows & MAE (W) & F1 & Prec. & Recall \\
+\midrule
+UK-DALE (5 seeds) & all test windows & 2{,}488 & 15.01$\pm$0.15 & 0.549$\pm$0.006 & 0.424$\pm$0.012 & 0.779$\pm$0.021 \\
+UK-DALE (5 seeds) & windows with $<$10\% zero samples & 2{,}452 & 14.55$\pm$0.15 & 0.548$\pm$0.006 & 0.423$\pm$0.012 & 0.781$\pm$0.021 \\
+UK-DALE (5 seeds) & windows with $\geq$10\% zero samples & 36 & 46.07$\pm$1.26 & 0.585$\pm$0.007 & 0.501$\pm$0.014 & 0.704$\pm$0.032 \\
+\midrule \\
+REFIT (deployed) & all test windows & 59{,}927 & 15.66 & 0.448 & 0.306 & 0.838 \\
+REFIT (deployed) & windows with $<$10\% zero samples & 31{,}414 & 19.67 & 0.448 & 0.306 & 0.839 \\
+REFIT (deployed) & windows with $\geq$10\% zero samples & 28{,}513 & 11.24 & 0.449 & 0.307 & 0.835 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Usage statistics of the appliances and the usage type (A, B, C) assigned to them. ON is power above 15~W; events are runs of ON samples at 8~s resolution inside the 512-step windows of all splits (the SustDataED2 statistics include the periods in which a channel was not recorded). The last column is the share of events shorter than 16~s (two samples). The types were assigned manually from the device category (A: continuously running or thermostatically cycling and standby devices; B: user-driven devices with long or variable use; C: short high-power events), not from these statistics.}
+\label{tab:appliance_usage}
+\footnotesize
+\begin{tabular}{@{}llcrrrrr@{}}
+\toprule
+Dataset & Appliance & Type & ON (\%) & Mean ON (W) & Events/day & Median event (min) & $<$16~s (\%) \\
+\midrule
+UK-DALE & tv & A & 8.38 & 100 & 94.3 & 0.9 & 2.3 \\
+UK-DALE & dishwasher & B & 1.92 & 695 & 21.4 & 0.8 & 5.0 \\
+UK-DALE & laptop & B & 10.19 & 26 & 142.4 & 0.9 & 13.4 \\
+UK-DALE & kettle & C & 0.55 & 2159 & 8.7 & 0.7 & 14.6 \\
+UK-DALE & boiler & A & 12.48 & 65 & 51.4 & 2.4 & 8.3 \\
+UK-DALE & microwave & C & 0.53 & 1228 & 9.8 & 0.5 & 12.6 \\
+UK-DALE & htpc & A & 19.59 & 65 & 210.6 & 0.9 & 1.6 \\
+UK-DALE & adsl\_router & A & 0.00 & 70 & 0.0 & 0.1 & 100.0 \\
+UK-DALE & fridge & A & 35.98 & 89 & 447.3 & 0.8 & 5.8 \\
+UK-DALE & washing\_machine & C & 4.33 & 548 & 87.3 & 0.4 & 18.5 \\
+UK-DALE & kitchen\_lights & B & 10.65 & 172 & 45.6 & 2.4 & 6.1 \\
+UK-DALE & toaster & C & 0.52 & 1477 & 6.5 & 0.9 & 9.9 \\
+\midrule \\
+SustDataED2 & TV-Philips & A & 8.54 & 21 & 34.9 & 0.1 & 50.7 \\
+SustDataED2 & Fridge-Freezer & A & 28.57 & 124 & 11.9 & 33.9 & 0.2 \\
+SustDataED2 & Freezer & A & 34.24 & 64 & 37.5 & 12.7 & 0.3 \\
+SustDataED2 & TV-Samsung & A & 2.39 & 44 & 1.1 & 25.5 & 0.0 \\
+SustDataED2 & TV-Sharp & A & 8.18 & 46 & 2.7 & 50.0 & 0.0 \\
+SustDataED2 & MacBookPro2011-1 & B & 3.58 & 30 & 9.9 & 0.5 & 27.9 \\
+SustDataED2 & MacBookPro2011-2 & B & 2.95 & 29 & 4.3 & 0.5 & 31.1 \\
+SustDataED2 & Microwave & C & 4.97 & 301 & 10.8 & 5.5 & 1.0 \\
+SustDataED2 & Kettle & C & 0.66 & 1771 & 2.7 & 3.9 & 0.0 \\
+SustDataED2 & VaccumCleaner & C & 0.43 & 124 & 0.7 & 1.9 & 8.7 \\
+SustDataED2 & HairDryer-Straightener & C & 0.31 & 370 & 2.6 & 0.7 & 0.4 \\
+SustDataED2 & CoffeeMachine & C & 0.09 & 522 & 1.4 & 0.8 & 2.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Event-level false detections of the regression output on the test splits (deployed models; REFIT: unseen houses 19--21, appliances present in each house). Events are runs above the threshold with gaps shorter than 40~s merged and events shorter than 24~s ignored; a predicted event is true if it overlaps a true event within 16~s. True and false events are given per appliance and day; the last two columns use the post-processing threshold of 25~W instead of 15~W.}
+\label{tab:event_false_alarms}
+\scriptsize
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Dataset & Appliance & True ev./day & False ev./day (15~W) & Event prec. & Event recall & False ev./day (25~W) & Event recall (25~W) \\
+\midrule
+REFIT & computer & 4.5 & 28.8 & 0.09 & 0.79 & 20.4 & 0.56 \\
+REFIT & dishwasher & 2.2 & 16.7 & 0.18 & 0.66 & 9.2 & 0.58 \\
+REFIT & freezer & 17.6 & 23.4 & 0.57 & 0.99 & 18.7 & 0.90 \\
+REFIT & fridge & 19.0 & 22.4 & 0.53 & 0.99 & 20.0 & 0.84 \\
+REFIT & kettle & 3.9 & 10.3 & 0.26 & 0.93 & 7.0 & 0.91 \\
+REFIT & microwave & 2.1 & 12.2 & 0.14 & 0.92 & 10.2 & 0.90 \\
+REFIT & television & 3.0 & 27.4 & 0.17 & 0.90 & 23.2 & 0.79 \\
+REFIT & tumble\_dryer & 0.7 & 18.8 & 0.04 & 0.70 & 13.7 & 0.65 \\
+REFIT & washing\_machine & 2.9 & 18.1 & 0.08 & 0.87 & 14.2 & 0.79 \\
+REFIT & \textit{macro mean} & 6.2 & 19.8 & 0.23 & 0.86 & 15.2 & 0.77 \\
+\midrule \\
+UK-DALE & boiler & 5.6 & 48.8 & 0.24 & 0.92 & 7.7 & 0.29 \\
+UK-DALE & dishwasher & 2.1 & 28.0 & 0.05 & 0.59 & 18.0 & 0.50 \\
+UK-DALE & fridge & 28.8 & 10.7 & 0.63 & 1.00 & 25.8 & 0.98 \\
+UK-DALE & htpc & 2.2 & 31.5 & 0.44 & 0.94 & 10.0 & 0.73 \\
+UK-DALE & kettle & 5.2 & 18.3 & 0.22 & 0.99 & 14.8 & 0.99 \\
+UK-DALE & kitchen\_lights & 13.4 & 17.5 & 0.43 & 0.89 & 19.9 & 0.82 \\
+UK-DALE & laptop & 2.2 & 0.0 & 0.00 & 0.00 & 0.0 & 0.00 \\
+UK-DALE & microwave & 9.4 & 15.2 & 0.38 & 0.97 & 12.3 & 0.94 \\
+UK-DALE & toaster & 2.6 & 22.5 & 0.10 & 0.93 & 19.4 & 0.92 \\
+UK-DALE & tv & 1.9 & 21.5 & 0.23 & 0.98 & 14.0 & 0.95 \\
+UK-DALE & washing\_machine & 1.3 & 9.2 & 0.35 & 0.97 & 6.8 & 0.97 \\
+UK-DALE & \textit{macro mean} & 6.8 & 20.3 & 0.28 & 0.83 & 13.5 & 0.73 \\
+\midrule \\
+SustDataED2 & CoffeeMachine & 1.7 & 11.4 & 0.04 & 0.24 & 0.1 & 0.04 \\
+SustDataED2 & Freezer & 25.7 & 13.9 & 0.68 & 1.00 & 12.6 & 1.00 \\
+SustDataED2 & Fridge-Freezer & 7.2 & 13.4 & 0.35 & 1.00 & 8.9 & 1.00 \\
+SustDataED2 & HairDryer-Straightener & 0.8 & 5.6 & 0.12 & 0.67 & 2.3 & 0.58 \\
+SustDataED2 & Kettle & 2.6 & 0.8 & 0.77 & 0.97 & 0.7 & 0.97 \\
+SustDataED2 & Microwave & 11.8 & 4.5 & 0.75 & 0.85 & 3.1 & 0.81 \\
+SustDataED2 & TV-Samsung & 1.2 & 0.0 & 1.00 & 0.00 & 0.0 & 0.00 \\
+SustDataED2 & VaccumCleaner & 0.5 & 11.2 & 0.04 & 0.86 & 10.3 & 0.57 \\
+SustDataED2 & \textit{macro mean} & 6.4 & 7.6 & 0.47 & 0.70 & 4.7 & 0.62 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Cross-household check of the forecasting benchmark (simplified protocol, UK-DALE releases ending January 2015; chronological 60/20/20\% split). House 1: Nov 2012--Jan 2015, test from 31 Jul 2014; House 2: 17 Feb--10 Oct 2013, test from 24 Aug 2013 (about 4.6 months of training data); House 5: 29 Jun--13 Nov 2014, test from 17 Oct 2014 (about 2.7 months of training data). MAE in W; skill is the MAE reduction of the gradient-boosted model (GBM) relative to the strongest baseline; the last column gives the skill (\%) per season of the test period.}
+\label{tab:forecast_houses}
+\scriptsize
+\begin{tabular}{@{}llrrrrrrl@{}}
+\toprule
+House & Horizon & Mean (W) & Persist. & ARIMA & Seas. naive & GBM & Skill (\%) & Skill by season \\
+\midrule
+House 1 & 15 min & 386 & 138 & 139 & 215 & 123 & 11.4 & aut 13, sum 7, win 10 \\
+ & 1 h & 386 & 200 & 195 & 215 & 152 & 22.0 & aut 22, sum 15, win 25 \\
+ & 24 h & 386 & 214 & 208 & 214 & 169 & 18.8 & aut 22, sum 10, win 16 \\
+\midrule \\
+House 2 & 15 min & 311 & 140 & 132 & 191 & 125 & 5.4 & aut 7, sum 1 \\
+ & 1 h & 311 & 189 & 182 & 190 & 154 & 15.5 & aut 16, sum 14 \\
+ & 24 h & 313 & 187 & 182 & 187 & 162 & 10.8 & aut 12, sum 7 \\
+\midrule \\
+House 5 & 15 min & 668 & 142 & 145 & 302 & 152 & -6.8 & aut -7 \\
+ & 1 h & 668 & 241 & 237 & 302 & 270 & -13.9 & aut -14 \\
+ & 24 h & 668 & 302 & 297 & 302 & 275 & 7.2 & aut 7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Retraining experiments on UK-DALE House 1 for the second revision (proposed model and loss, mean $\pm$ std over three seeds). Upper block: sampling interval (same 512-step window, so the window and the receptive field span more time at coarser steps; the test sets differ in size and the rows are not accuracies of the same task). Second block: 8~s model trained and tested without the windows with 10\% or more zero aggregate samples (compare with 14.55~W and F1 0.548 of the deployed model on the same test subset, Table~\ref{tab:gap_eval}). Third block: device types from the manual assignment, from the training-split ON share (A $\ge$10\%, B 1--10\%, C $<$1\%) and randomly permuted. Last row: share of the UK-DALE events (native 6~s) that never exceed 15~W in any averaged bin, and the share of event energy they carry, for the laptop at 8, 16 and 32~s (all other appliances lose at most 0.7\% of the events and 0.1\% of the energy at 8~s).}
+\label{tab:round2_retrain}
+\footnotesize
+\begin{tabular}{@{}lcrrccc@{}}
+\toprule
+Setting & Step & Train / test windows & MAE (W) & F1 & Precision / recall & RF / window (min) \\
+\midrule
+Interval 6~s & 6~s & 15,480 / 3,318 & $15.79\pm0.87$ & $0.521\pm0.028$ & 0.387 / 0.804 & 25.9 / 51.2 \\
+Interval 8~s (deployed) & 8~s & 11,610 / 2,488 & $15.26\pm0.23$ & $0.545\pm0.005$ & 0.414 / 0.797 & 34.5 / 68.3 \\
+Interval 16~s & 16~s & 5,805 / 1,244 & $13.95\pm0.10$ & $0.595\pm0.003$ & 0.485 / 0.769 & 69.1 / 136.5 \\
+\midrule
+Without gap windows & 8~s & 10,452 / 2,452 & $14.41\pm0.06$ & $0.551\pm0.006$ & 0.425 / 0.787 & 34.5 / 68.3 \\
+\midrule
+Manual types & 8~s & 11,610 / 2,488 & $15.26\pm0.23$ & $0.545\pm0.005$ & 0.414 / 0.797 & 34.5 / 68.3 \\
+Data-driven types & 8~s & 11,610 / 2,488 & $14.94\pm0.11$ & $0.554\pm0.004$ & 0.434 / 0.764 & 34.5 / 68.3 \\
+Permuted types & 8~s & 11,610 / 2,488 & $15.08\pm0.21$ & $0.550\pm0.008$ & 0.425 / 0.783 & 34.5 / 68.3 \\
+\midrule
+Laptop events lost & 8 / 16 / 32~s & \multicolumn{2}{c}{4.0 / 10.7 / 14.3\% of events} & \multicolumn{3}{c}{0.31 / 1.0 / 1.9\% of event energy} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Functional check of the regression models on an emulated ARM926EJ-S (QEMU user-mode emulation of the soft-float ARM build of NCNN, single thread, 10 test windows of 512 steps per model). INT8 is the model with all convolutions quantized (ACIQ). Columns: largest absolute difference between the INT8 outputs of the ARM926 and of the x86 build (W); agreement of the ON/OFF decision at 15~W and mean absolute output difference between the FP32 and the INT8 model, both run on the ARM926 build. The run time under emulation reflects the host, not the F1C200s (the FP32 model took about 26 times longer than INT8 on the host) and is not a latency estimate; FP32 latency, memory and power on the board were not measured.}
+\label{tab:arm_emulation}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Model & Samples & INT8 ARM vs x86, max (W) & FP32 vs INT8 ON/OFF agreement (\%) & FP32 vs INT8 mean diff. (W) \\
+\midrule
+UK-DALE & 61{,}440 & 0.0001 & 98.4 & 1.13 \\
+REFIT & 46{,}080 & 1.17 & 96.9 & 1.13 \\
+SustDataED2 & 61{,}440 & 0.0001 & 99.6 & 0.80 \\
 \bottomrule
 \end{tabular}
 \end{table}
